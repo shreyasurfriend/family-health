@@ -1,0 +1,5 @@
+legacy-streamlit/
+.claude/
+*.db
+.venv/
+__pycache__/

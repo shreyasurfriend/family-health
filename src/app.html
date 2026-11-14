@@ -1,0 +1,1440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Family Health Records</title>
+<style>
+:root{
+  --bg:#f6f7f9; --card:#fff; --text:#1d2330; --muted:#677084; --line:#e2e5ea;
+  --accent:#1f7a6d; --accent-soft:#e3f2ef; --warn:#a66300; --warn-soft:#fff3df;
+  --bad:#b3261e; --bad-soft:#fde8e6; --chip:#eef0f4; --band:rgba(46,158,107,.14);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#13161c; --card:#1c2029; --text:#e6e8ee; --muted:#9aa2b3; --line:#2c323e;
+    --accent:#4fc1ad; --accent-soft:#1d3531; --warn:#f0b35a; --warn-soft:#3a2e1a;
+    --bad:#f2867d; --bad-soft:#3d2120; --chip:#272c37; --band:rgba(79,193,173,.13);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;position:sticky;top:0;z-index:5}
+header h1{font-size:18px;margin:0 auto 0 0}
+header select{width:auto;max-width:60vw}
+nav{display:flex;gap:4px;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:thin}
+nav button{background:none;border:0;color:var(--muted);padding:6px 12px;border-radius:999px;cursor:pointer;font:inherit;white-space:nowrap}
+nav button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+main{max-width:1150px;margin:0 auto;padding:16px}
+button,select,input,textarea{font:inherit;color:var(--text)}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.btn.ghost{background:var(--chip);color:var(--text)}
+.btn.sm{padding:3px 10px;font-size:13px}
+.btn.danger{background:var(--bad-soft);color:var(--bad)}
+.btn:disabled{opacity:.5;cursor:default}
+select,input,textarea{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%}
+input[type=checkbox]{width:auto}
+h2{font-size:17px;margin:0}
+h3{font-size:15.5px;margin:0 0 6px}
+.row{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;justify-content:space-between;margin:4px 0 12px}
+.row.tight{margin:0 0 4px}
+.section{margin-bottom:22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.grid.small{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.cols2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.card.click{cursor:pointer}
+.card.click:hover{border-color:var(--accent)}
+.muted{color:var(--muted)}
+.small-text{font-size:13px}
+.chip{display:inline-block;background:var(--chip);border-radius:999px;padding:1px 9px;font-size:12.5px;margin:2px 4px 2px 0;white-space:nowrap}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.ok{background:var(--accent-soft);color:var(--accent)}
+dl.facts{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:8px 0 0;font-size:14px}
+dl.facts dt{color:var(--muted)}
+dl.facts dd{margin:0}
+.tablewrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%}
+.tablewrap table{min-width:640px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.act{white-space:nowrap;text-align:right}
+td input,td select{padding:4px 6px;min-width:70px}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.list .item{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.list .item:last-child{border-bottom:0}
+.list .date{min-width:96px;font-variant-numeric:tabular-nums}
+.list .grow{flex:1 1 200px;min-width:0}
+.list label.grow{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.list label.grow input{margin-top:4px}
+.banner{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:14px}
+.flash{background:var(--accent-soft);color:var(--accent);border-radius:10px;padding:8px 12px;margin-bottom:12px}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+@media (max-width:760px){.filters{grid-template-columns:1fr 1fr}.filters .q{grid-column:1/-1}}
+.filters label{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+svg.chart{width:100%;height:auto;display:block}
+svg .gl{stroke:var(--line);stroke-width:1}
+svg .ax{font-size:11px;fill:var(--muted)}
+svg [data-tip]{cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+#tip{position:fixed;z-index:50;background:var(--text);color:var(--bg);padding:6px 9px;border-radius:8px;font-size:13px;white-space:pre-line;pointer-events:none;display:none;max-width:280px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);width:min(620px,calc(100vw - 24px));padding:0;max-height:calc(100vh - 32px)}
+dialog.wide{width:min(900px,calc(100vw - 24px))}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog form{padding:18px}
+dialog h2{margin:0 0 12px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fields label{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted)}
+.fields label.wide{grid-column:1/-1}
+.fields label.check{flex-direction:row;align-items:center;gap:8px}
+.dlg-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:16px}
+@media (max-width:560px){.fields{grid-template-columns:1fr}}
+.summary h1{font-size:20px;margin:0 0 2px}
+.summary h2{font-size:15px;margin:16px 0 6px}
+.summary table{font-size:13.5px;margin-bottom:6px}
+.summary th,.summary td{padding:4px 8px;border:1px solid var(--line)}
+pre.raw{white-space:pre-wrap;font-size:12px;max-height:300px;overflow:auto;background:var(--chip);padding:10px;border-radius:8px}
+#printArea{display:none}
+@media print{
+  header,nav,.btn,td.act,.banner{display:none!important}
+  body.printing > :not(#printArea){display:none!important}
+  body.printing #printArea{display:block;padding:0 8px}
+  body{background:#fff;color:#000}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>🩺 Family Health</h1>
+  <label class="muted">Showing <select id="filter" aria-label="Family member"></select></label>
+  <button class="btn ghost" data-act="sync" id="syncBtn" title="Sync with GitHub">Set up sync</button>
+  <button class="btn ghost" data-act="export">Backup</button>
+  <button class="btn ghost" data-act="import">Import</button>
+  <input type="file" id="importFile" accept=".json,application/json" hidden>
+</header>
+<nav id="tabs"></nav>
+<main id="view"></main>
+<dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
+<div id="tip" role="tooltip"></div>
+<div id="printArea"></div>
+
+<script>
+"use strict";
+// ===================================================================
+// Family Health Records: single-file, offline, browser-only app.
+// Data lives in this browser's localStorage; Backup/Import move it as JSON, and optional
+// Sync keeps one encrypted copy in a private GitHub repo shared by all devices.
+// ===================================================================
+const KEY = "familyHealth.v2", OLD_KEY = "familyHealth.v1";
+const CATEGORIES = ["CBC","Lipid","Diabetes","Iron","Vitamins","Thyroid","Liver","Kidney","Vitals",
+                    "Radiology","Orthopedics","Surgery","Ophthalmology","Clinical","Medication"];
+const LAB_CATS = CATEGORIES.slice(0, 9);
+const PROCEDURE_CATS = ["Radiology","Orthopedics","Surgery","Ophthalmology"];
+const STATUSES = ["Normal","Borderline","High","Low","Critical","Active","Resolved"];
+const URGENCIES = ["Immediate","Recommended","Routine"];
+const ALERT_ORDER = {Critical:0, High:1, Low:2, Borderline:3};
+const STATUS_COLOR = {Normal:"#2e9e6b", Borderline:"#d39b1f", High:"#d9534f", Low:"#3b7dd8", Critical:"#9b1c1c"};
+const SERIES_COLORS = ["#2f6fb3","#d9822b","#7a5cc2","#2e9e6b","#c2408a","#5b8c1a","#8a6d3b"];
+const TABLES = ["members","records","tasks","medicines","vaccines","visits"];
+
+// ---------- small helpers ----------
+const $ = s => document.querySelector(s);
+const today = () => new Date().toLocaleDateString("en-CA");               // YYYY-MM-DD local
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num = v => { if (v === null || v === undefined || v === "") return null; const n = Number(v); return isFinite(n) ? n : null; };
+const isDate = s => /^\d{4}-\d{2}-\d{2}$/.test(s || "");
+const ms = d => new Date(d + "T00:00").getTime();
+const fmtDate = d => isDate(d) ? new Date(d + "T00:00").toLocaleDateString("en-IN", {day:"2-digit", month:"short", year:"numeric"}) : (d || "");
+const fmtNum = v => v == null ? "" : String(Math.round(Number(v) * 1000) / 1000);
+const lower = s => String(s || "").trim().toLowerCase();
+const splitList = s => String(s || "").split(/[,;\n]/).map(x => x.trim()).filter(Boolean);
+const daysUntil = d => Math.round((ms(d) - ms(today())) / 864e5);
+const chip = (t, cls = "") => `<span class="chip ${cls}">${esc(t)}</span>`;
+
+function ageYears(dob, ref) {
+  if (!isDate(dob)) return null;
+  const [y, m, d] = dob.split("-").map(Number), [ty, tm, td] = (ref || today()).split("-").map(Number);
+  return ty - y - ((tm < m || (tm === m && td < d)) ? 1 : 0);
+}
+function ageLabel(dob) {
+  const a = ageYears(dob);
+  if (a === null) return "";
+  if (a >= 1) return a + " y";
+  const b = new Date(dob + "T00:00"), n = new Date();
+  return Math.max(0, (n.getFullYear() - b.getFullYear()) * 12 + n.getMonth() - b.getMonth()) + " mo";
+}
+
+// Within range = Normal; up to 10% outside = Borderline; further = High/Low;
+// more than 2x the upper limit or under half the lower limit = Critical.
+function computeStatus(value, lo, hi) {
+  value = num(value); lo = num(lo); hi = num(hi);
+  if (value === null || (lo === null && hi === null)) return "";
+  if (hi !== null && value > hi) {
+    if (hi > 0 && value > 2 * hi) return "Critical";
+    return value <= hi * 1.10 ? "Borderline" : "High";
+  }
+  if (lo !== null && value < lo) {
+    if (lo > 0 && value < 0.5 * lo) return "Critical";
+    return value >= lo * 0.90 ? "Borderline" : "Low";
+  }
+  return "Normal";
+}
+function fmtRange(lo, hi) {
+  lo = num(lo); hi = num(hi);
+  if (lo !== null && hi !== null) return `${fmtNum(lo)}–${fmtNum(hi)}`;
+  if (hi !== null) return `< ${fmtNum(hi)}`;
+  if (lo !== null) return `> ${fmtNum(lo)}`;
+  return "";
+}
+function statusChip(s) {
+  if (!s) return "";
+  const cls = {Normal:"ok", Borderline:"warn", High:"bad", Low:"bad", Critical:"bad", Active:"warn", Resolved:""}[s];
+  return chip(s, cls);
+}
+
+// ---------- lab report text parsing (used for PDFs and old backups) ----------
+const R_NAME = String.raw`(?<name>[A-Za-z][A-Za-z0-9 ,()\[\]/.\-+%]*?[A-Za-z0-9)\]%])`;
+const R_VALUE = String.raw`(?<value>\d+(?:\.\d+)?)(?:\s*(?<flag>High|Low|H|L)\b|\s*\*)?`;
+const R_UNIT = String.raw`(?<unit>(?:10\^\d+\/|x10\^\d+\/)?[^\s\d<>:\-–][^\s]*)`;
+const R_RANGE = String.raw`(?:(?<low>\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(?<high>\d+(?:\.\d+)?)|(?:<=|<|less than|upto|up to)\s*(?<lt>\d+(?:\.\d+)?)|(?:>=|>|more than|greater than)\s*(?<gt>\d+(?:\.\d+)?))`;
+const LAYOUT_UNIT_RANGE = new RegExp(String.raw`^${R_NAME}\s*:?\s+${R_VALUE}\s+${R_UNIT}\s+${R_RANGE}\s*$`, "i");
+const LAYOUT_RANGE_UNIT = new RegExp(String.raw`^${R_NAME}\s*:?\s+${R_VALUE}\s+${R_RANGE}\s+${R_UNIT}\s*$`, "i");
+const LAYOUT_NO_UNIT = new RegExp(String.raw`^${R_NAME}\s*:?\s+${R_VALUE}\s+${R_RANGE}\s*$`, "i");
+const LAYOUTS = {
+  "Auto-detect": [LAYOUT_UNIT_RANGE, LAYOUT_RANGE_UNIT, LAYOUT_NO_UNIT],
+  "SRL / Metropolis (Test, Result, Unit, Range)": [LAYOUT_UNIT_RANGE, LAYOUT_NO_UNIT],
+  "Vaidya Lab (Test, Result, Range, Unit)": [LAYOUT_RANGE_UNIT, LAYOUT_NO_UNIT],
+};
+const SKIP_LINE = /^(page|test name|investigation|method|sample|specimen|ref\.?|reference|bio\.? ?ref|patient|age|sex|gender|dr\.?|doctor|lab no|registered|reported|collected)\b/i;
+const CATEGORY_KEYWORDS = [
+  ["Diabetes", ["hba1c","glycated","glucose","sugar","insulin"]],
+  ["Lipid", ["cholesterol","triglyceride","triglycerides","hdl","ldl","vldl","lipid"]],
+  ["Thyroid", ["tsh","t3","t4","thyroid","thyroxine"]],
+  ["Iron", ["ferritin","iron","tibc","transferrin"]],
+  ["Vitamins", ["vitamin","b12","cobalamin","folate","folic","25-oh","25 oh"]],
+  ["Liver", ["sgpt","sgot","alt","ast","bilirubin","alkaline phosphatase","ggt","albumin","globulin","total protein"]],
+  ["Kidney", ["creatinine","urea","bun","uric acid","egfr","sodium","potassium","chloride"]],
+  ["Vitals", ["bp","blood pressure","systolic","diastolic","pulse","weight","bmi","spo2","temperature"]],
+  ["CBC", ["haemoglobin","hemoglobin","rbc","wbc","platelet","platelets","hematocrit","haematocrit","pcv","mcv","mch","mchc","rdw",
+           "neutrophils","neutrophil","lymphocytes","lymphocyte","monocytes","eosinophils","basophils","esr","leucocyte","leukocyte"]],
+];
+const reEscape = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function guessCategory(name) {
+  const b = lower(name);
+  for (const [cat, words] of CATEGORY_KEYWORDS)
+    if (words.some(w => new RegExp("(^|[^a-z])" + reEscape(w) + "([^a-z]|$)").test(b))) return cat;
+  return "Clinical";
+}
+function parseRange(text) {
+  const m = String(text || "").match(new RegExp(R_RANGE, "i"));
+  if (!m) return {lo: null, hi: null};
+  const g = m.groups;
+  return {lo: num(g.low != null ? g.low : g.gt), hi: num(g.high != null ? g.high : g.lt)};
+}
+function parseLabText(text, layout = "Auto-detect") {
+  const rows = [], seen = new Set();
+  for (const raw of String(text).split(/\r?\n/)) {
+    const line = raw.replace(/\s+/g, " ").trim();
+    if (line.length < 5 || SKIP_LINE.test(line)) continue;
+    for (const rx of LAYOUTS[layout]) {
+      const m = line.match(rx);
+      if (!m) continue;
+      const g = m.groups, name = g.name.replace(/^[\s:.\-]+|[\s:.\-]+$/g, "");
+      if ((name.match(/[A-Za-z]/g) || []).length < 2) break;
+      const lo = g.low != null ? g.low : g.gt, hi = g.high != null ? g.high : g.lt;
+      const row = {category: guessCategory(name), biomarker: name, value: Number(g.value), unit: g.unit || "",
+                   ref_low: num(lo), ref_high: num(hi)};
+      const key = lower(name) + "|" + row.value;
+      if (!seen.has(key)) { seen.add(key); rows.push(row); }
+      break;
+    }
+  }
+  return rows;
+}
+const MONTHS = {jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+function validIso(y, m, d) {
+  const iso = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  const dt = new Date(iso + "T00:00");
+  return !isNaN(dt) && dt.toLocaleDateString("en-CA") === iso ? iso : null;
+}
+function firstDate(s) {
+  const found = [];
+  const add = (idx, iso) => { if (iso) found.push([idx, iso]); };
+  for (const m of s.matchAll(/\b(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})\b/g)) add(m.index, validIso(m[3], m[2], m[1]));
+  for (const m of s.matchAll(/\b(\d{1,2})[\s\-\/]([A-Za-z]{3})[A-Za-z]*[\s\-\/,]+(\d{4})\b/g)) {
+    const mon = MONTHS[m[2].toLowerCase()]; if (mon) add(m.index, validIso(m[3], mon, m[1]));
+  }
+  for (const m of s.matchAll(/\b(\d{4})-(\d{2})-(\d{2})\b/g)) add(m.index, validIso(m[1], m[2], m[3]));
+  found.sort((a, b) => a[0] - b[0]);
+  return found.length ? found[0][1] : null;
+}
+function findReportDate(text) {
+  for (const line of String(text).split(/\r?\n/))
+    if (/collect|sample|report|registered|received/i.test(line)) { const d = firstDate(line); if (d) return d; }
+  return firstDate(String(text));
+}
+
+// ---------- schema for forms, import and export ----------
+const MEMBER_F = {k:"member_name", l:"Family member", t:"member", req:1};
+const SCHEMA = {
+  members: {one:"family member", fields:[
+    {k:"name", l:"Name", req:1}, {k:"relation", l:"Relation (Self, Wife, Son…)"},
+    {k:"dob", l:"Date of birth", t:"date"}, {k:"gender", l:"Gender", t:"select", opts:["","Female","Male","Other"]},
+    {k:"blood_group", l:"Blood group", t:"select", opts:["","A+","A-","B+","B-","AB+","AB-","O+","O-"]},
+    {k:"doctor", l:"Family doctor & phone"},
+    {k:"allergies", l:"Allergies (comma separated)", t:"textarea"},
+    {k:"conditions", l:"Chronic conditions (comma separated)", t:"textarea"},
+    {k:"emergency", l:"Emergency contact"}, {k:"insurance", l:"Health insurance / policy"},
+    {k:"medical_notes", l:"Surgical history & other notes", t:"textarea"}]},
+  records: {one:"lab result / record", fields:[
+    MEMBER_F, {k:"test_date", l:"Date", t:"date", req:1},
+    {k:"category", l:"Category", t:"select", opts:CATEGORIES, req:1},
+    {k:"biomarker", l:"Test / item (HbA1c, Knee MRI…)", req:1, list:"bioNames"},
+    {k:"value", l:"Value", t:"number"}, {k:"unit", l:"Unit (%, mg/dL…)"},
+    {k:"ref_low", l:"Normal range: low", t:"number"}, {k:"ref_high", l:"Normal range: high", t:"number"},
+    {k:"status", l:"Status (blank = work out from range)", t:"select", opts:[""].concat(STATUSES)},
+    {k:"notes", l:"Notes / findings", t:"textarea"}]},
+  tasks: {one:"task / reminder", fields:[
+    MEMBER_F, {k:"task", l:"What", req:1, wide:1}, {k:"due_date", l:"Due date", t:"date"},
+    {k:"urgency", l:"Urgency", t:"select", opts:URGENCIES},
+    {k:"status", l:"Status", t:"select", opts:["Pending","Completed"]}, {k:"notes", l:"Notes", t:"textarea"}]},
+  medicines: {one:"medicine", title:"Medicines", fields:[
+    MEMBER_F, {k:"name", l:"Medicine", req:1}, {k:"dosage", l:"Dosage (500 mg)"},
+    {k:"frequency", l:"When (1-0-1 after food)"}, {k:"start_date", l:"Start date", t:"date"},
+    {k:"end_date", l:"End date (blank = ongoing)", t:"date"}, {k:"refill_date", l:"Next refill", t:"date"},
+    {k:"prescribed_by", l:"Prescribed by"}, {k:"notes", l:"Notes", t:"textarea"}],
+    cols:["member_name","name","dosage","frequency","start_date","end_date","refill_date"]},
+  vaccines: {one:"vaccine", title:"Vaccinations", fields:[
+    MEMBER_F, {k:"name", l:"Vaccine", req:1}, {k:"dose", l:"Dose (1st, booster…)"},
+    {k:"date_given", l:"Date given", t:"date"}, {k:"next_due", l:"Next dose due", t:"date"},
+    {k:"notes", l:"Notes / batch / place", t:"textarea"}],
+    cols:["member_name","name","dose","date_given","next_due"]},
+  visits: {one:"doctor visit", title:"Doctor visits", fields:[
+    MEMBER_F, {k:"visit_date", l:"Date", t:"date", req:1}, {k:"doctor", l:"Doctor"}, {k:"hospital", l:"Clinic / hospital"},
+    {k:"reason", l:"Reason", wide:1}, {k:"diagnosis", l:"Diagnosis", t:"textarea"},
+    {k:"prescription", l:"Prescription / advice", t:"textarea"}, {k:"follow_up", l:"Follow-up date", t:"date"},
+    {k:"cost", l:"Cost (₹)", t:"number"}, {k:"notes", l:"Notes", t:"textarea"}],
+    cols:["member_name","visit_date","doctor","reason","diagnosis","follow_up"]},
+};
+const DEDUP_KEY = {
+  members: r => lower(r.name),
+  records: r => [r.member_name, r.test_date, r.category, lower(r.biomarker), r.value == null ? "" : Math.round(r.value * 1e4)].join("|"),
+  tasks: r => [r.member_name, lower(r.task), r.due_date || ""].join("|"),
+  medicines: r => [r.member_name, lower(r.name), r.start_date || ""].join("|"),
+  vaccines: r => [r.member_name, lower(r.name), r.dose || "", r.date_given || ""].join("|"),
+  visits: r => [r.member_name, r.visit_date, lower(r.doctor), lower(r.reason)].join("|"),
+};
+
+function normalize(kind, src) {
+  const out = {id: src.id || uid()};
+  for (const f of SCHEMA[kind].fields) {
+    const v = src[f.k];
+    out[f.k] = f.t === "number" ? num(v) : (v == null ? "" : String(v).trim());
+  }
+  if (kind === "records" && !out.status) out.status = computeStatus(out.value, out.ref_low, out.ref_high);
+  if (kind === "tasks") { out.status = out.status || "Pending"; out.urgency = out.urgency || "Routine"; }
+  return out;
+}
+
+// ---------- storage ----------
+const blank = () => ({version: 2, meta: {}, members: [], records: [], tasks: [], medicines: [], vaccines: [], visits: []});
+let storageOk = true;
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (d) return Object.assign(blank(), d);
+    const old = JSON.parse(localStorage.getItem(OLD_KEY));
+    if (old && Array.isArray(old.members) && old.members.length) {          // data from the first version
+      const d2 = blank(); importInto(d2, fromV1(old)); d2.meta.migratedFromV1 = today(); return d2;
+    }
+  } catch (e) { if (e && e.name === "SecurityError") storageOk = false; }
+  return blank();
+}
+function save() { stamp(); persist(); scheduleSync(); }
+function persist() {
+  try { localStorage.setItem(KEY, JSON.stringify(db)); storageOk = true; }
+  catch (e) { storageOk = false; }
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+}
+
+// For sync: every row carries _t (last change, ms) and db.deleted maps removed ids to when.
+// save() compares rows with the last snapshot, so no edit path has to remember to do this.
+let snap = new Map();
+const rowSig = r => JSON.stringify(r, (k, v) => k === "_t" ? undefined : v);
+function takeSnapshot() {
+  snap = new Map();
+  for (const t of TABLES) for (const r of db[t]) { if (r._t == null) r._t = 0; snap.set(r.id, {s: rowSig(r), t: r._t}); }
+}
+function stamp() {
+  const now = Date.now(), seen = new Set();
+  db.deleted = db.deleted || {};
+  for (const t of TABLES) for (const r of db[t]) {
+    const old = snap.get(r.id), sig = rowSig(r);
+    r._t = old ? (old.s === sig ? old.t : now) : (r._t || now);
+    seen.add(r.id);
+  }
+  for (const id of snap.keys()) if (!seen.has(id)) db.deleted[id] = now;
+  takeSnapshot();
+}
+
+// First version stored ids instead of names and used different field names.
+function fromV1(d) {
+  const nameOf = {}; (d.members || []).forEach(m => { if (m.name) nameOf[m.id] = m.name; });
+  const mem = r => nameOf[r.memberId];
+  return {
+    members: (d.members || []).filter(m => m.name).map(m => ({name:m.name, relation:m.relation, dob:m.dob, gender:m.gender,
+      blood_group:m.bloodGroup, allergies:m.allergies, conditions:m.conditions, doctor:m.doctor, emergency:m.emergency,
+      insurance:m.insurance, medical_notes:m.notes})),
+    medicines: (d.medicines || []).filter(mem).map(r => ({member_name:mem(r), name:r.name, dosage:r.dosage, frequency:r.frequency,
+      start_date:r.start, end_date:r.end, refill_date:r.refillDate, prescribed_by:r.prescribedBy, notes:r.notes})),
+    vaccines: (d.vaccines || []).filter(mem).map(r => ({member_name:mem(r), name:r.name, dose:r.dose, date_given:r.date,
+      next_due:r.nextDue, notes:r.notes})),
+    visits: (d.visits || []).filter(mem).map(r => ({member_name:mem(r), visit_date:r.date, doctor:r.doctor, hospital:r.hospital,
+      reason:r.reason, diagnosis:r.diagnosis, prescription:r.prescription, follow_up:r.followUp, cost:r.cost, notes:r.notes})),
+    records: (d.labs || []).filter(mem).map(r => { const rg = parseRange(r.refRange);
+      return {member_name:mem(r), test_date:r.date, category:guessCategory(r.test), biomarker:r.test, value:r.value,
+              unit:r.unit, ref_low:rg.lo, ref_high:rg.hi, notes:[r.lab, r.notes].filter(Boolean).join(" · ")}; }),
+    tasks: (d.reminders || []).filter(mem).map(r => ({member_name:mem(r), task:r.title, due_date:r.date,
+      status:r.done ? "Completed" : "Pending", urgency:"Routine"})),
+  };
+}
+
+// Validate + de-duplicate `data` and add it to `target`. All-or-nothing: throws on the first bad row.
+// Returns {table: {added, skipped}}. With dryRun the target is not changed.
+function importInto(target, data, dryRun = false) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("File must be a JSON object");
+  if (Array.isArray(data.labs) || Array.isArray(data.reminders)) data = fromV1(data);
+  if (!TABLES.some(t => Array.isArray(data[t]))) throw new Error("No members, records, tasks, medicines, vaccines or visits found");
+  for (const t of TABLES) if (data[t] != null && !Array.isArray(data[t])) throw new Error(`'${t}' must be a list`);
+
+  const report = {}, adds = {};
+  const names = new Map(target.members.map(m => [lower(m.name), m.name]));
+  for (const t of TABLES) {
+    report[t] = {added: 0, skipped: 0}; adds[t] = [];
+    const seen = new Set(target[t].map(DEDUP_KEY[t]));
+    (data[t] || []).forEach((raw, i) => {
+      if (!raw || typeof raw !== "object") throw new Error(`${t}[${i}] is not an object`);
+      const row = normalize(t, Object.assign({}, raw, {id: null}));
+      if (t !== "members") {
+        const real = names.get(lower(row.member_name));
+        if (!real) throw new Error(`${t}[${i}] belongs to unknown member '${row.member_name}'`);
+        row.member_name = real;
+      }
+      for (const f of SCHEMA[t].fields) {
+        if (f.req && (row[f.k] === "" || row[f.k] == null)) throw new Error(`${t}[${i}] is missing '${f.k}'`);
+        if (f.t === "date" && row[f.k] && !isDate(row[f.k])) throw new Error(`${t}[${i}] '${f.k}' must be YYYY-MM-DD, got '${row[f.k]}'`);
+      }
+      if (t === "records" && !CATEGORIES.includes(row.category)) throw new Error(`records[${i}] has unknown category '${row.category}'`);
+      const k = DEDUP_KEY[t](row);
+      if (seen.has(k)) { report[t].skipped++; return; }
+      seen.add(k); adds[t].push(row); report[t].added++;
+      if (t === "members") names.set(lower(row.name), row.name);
+    });
+  }
+  if (!dryRun) for (const t of TABLES) target[t].push(...adds[t]);
+  return report;
+}
+
+let db = load();
+takeSnapshot();
+let state = {tab: "family", filter: "", trendCat: "", trendTest: "", pdfLayout: "Auto-detect", hist: {q: "", type: "", status: "", from: "", to: ""}};
+try { Object.assign(state, JSON.parse(sessionStorage.getItem("fh.ui2")) || {}); } catch (e) {}
+let pdfState = null, flash = "";
+
+// ---------- queries ----------
+const memberByName = n => db.members.find(m => m.name === n);
+const sortedMembers = () => db.members.slice().sort((a, b) => a.name.localeCompare(b.name));
+const mine = (t, name) => db[t].filter(r => !name || r.member_name === name);
+const isActiveMed = m => !m.end_date || m.end_date >= today();
+const scopeName = () => state.filter || null;
+
+function latestLabs(recs) {
+  const best = new Map();
+  recs.forEach((r, i) => {
+    if (!LAB_CATS.includes(r.category) || r.value == null) return;
+    const k = r.member_name + "|" + r.category + "|" + lower(r.biomarker);
+    const cur = best.get(k);
+    if (!cur || r.test_date > cur.r.test_date || (r.test_date === cur.r.test_date && i > cur.i)) best.set(k, {r, i});
+  });
+  return [...best.values()].map(x => x.r);
+}
+function labAlerts(recs) {
+  return latestLabs(recs).filter(r => r.status in ALERT_ORDER)
+    .sort((a, b) => ALERT_ORDER[a.status] - ALERT_ORDER[b.status] || b.test_date.localeCompare(a.test_date));
+}
+// Dated items needing attention: pending tasks, vaccine due dates, visit follow-ups, medicine refills.
+function upcoming(name) {
+  const out = [];
+  mine("tasks", name).filter(t => t.status !== "Completed" && isDate(t.due_date)).forEach(t =>
+    out.push({date: t.due_date, title: t.task, member: t.member_name, kind: "tasks", id: t.id, field: null}));
+  mine("vaccines", name).filter(v => isDate(v.next_due)).forEach(v =>
+    out.push({date: v.next_due, title: `Vaccine due: ${v.name}${v.dose ? ` (after ${v.dose})` : ""}`, member: v.member_name, kind: "vaccines", id: v.id, field: "next_due"}));
+  mine("visits", name).filter(v => isDate(v.follow_up)).forEach(v =>
+    out.push({date: v.follow_up, title: `Follow-up${v.doctor ? ` with ${v.doctor}` : ""}${v.reason ? ` – ${v.reason}` : ""}`, member: v.member_name, kind: "visits", id: v.id, field: "follow_up"}));
+  mine("medicines", name).filter(m => isDate(m.refill_date) && isActiveMed(m)).forEach(m =>
+    out.push({date: m.refill_date, title: `Refill: ${m.name}`, member: m.member_name, kind: "medicines", id: m.id, field: "refill_date"}));
+  return out.sort((a, b) => a.date.localeCompare(b.date));
+}
+function dueChip(d) {
+  const n = daysUntil(d);
+  if (n < 0) return chip(`${-n} d overdue`, "bad");
+  if (n === 0) return chip("today", "warn");
+  if (n <= 7) return chip(`in ${n} d`, "warn");
+  return chip(`in ${n} d`);
+}
+
+// General screening reminders by age/gender (USPSTF / Indian NCD screening style). Not medical advice.
+function recommendations(age, gender, recs) {
+  const out = [], add = (task, urgency, why) => out.push({task, urgency, why});
+  const g = lower(gender);
+  if (age === null) { add("Add date of birth to get age-based recommendations", "Routine", "Age unknown"); return out; }
+  if (age < 18) {
+    add("Keep immunisations up to date (IAP schedule)", "Recommended", "Childhood vaccination schedule");
+    add("Annual paediatric check-up: growth, development, BMI", "Routine", "Under 18");
+    if (age >= 3) add("Vision screening", "Routine", "Children 3+");
+    if (age >= 1) add("Dental check-up every 6 months", "Routine", "Children 1+");
+    return out;
+  }
+  add("Blood pressure check (at least yearly)", age >= 40 ? "Recommended" : "Routine", "All adults");
+  add("Dental check-up every 6 months", "Routine", "All adults");
+  add("Tetanus-diphtheria (Td) booster every 10 years", "Routine", "All adults");
+  add("Lipid profile" + (age >= 40 ? " every 1-2 years" : " every 5 years"), age >= 40 ? "Recommended" : "Routine", "Adults 20+, more often from 40");
+  if (age >= 30) add("Diabetes screening (fasting glucose / HbA1c) every 3 years, yearly if overweight or family history", "Recommended", "Adults 30+");
+  add("Eye examination" + (age >= 60 ? " yearly" : " every 2 years"), age >= 60 ? "Recommended" : "Routine", "Adults; yearly from 60");
+  if (g.startsWith("f")) {
+    if (age >= 21 && age <= 65) add("Cervical cancer screening (Pap every 3 years or HPV test every 5 years from 30)", "Recommended", "Women 21-65");
+    if (age >= 40) add("Mammogram every 1-2 years", "Recommended", "Women 40+");
+    if (age >= 65) add("Bone density (DEXA) scan", "Recommended", "Women 65+");
+  }
+  if (g.startsWith("m") && age >= 50 && age <= 69) add("Discuss prostate (PSA) screening with doctor", "Routine", "Men 50-69");
+  if (age >= 45 && age <= 75) add("Colorectal cancer screening (stool test yearly or colonoscopy every 10 years)", "Recommended", "Adults 45-75");
+  if (age >= 65) {
+    add("Influenza vaccine every year", "Recommended", "Adults 65+");
+    add("Pneumococcal vaccine (once, per doctor)", "Recommended", "Adults 65+");
+    add("Hearing check", "Routine", "Adults 65+");
+  }
+  if ((recs || []).some(r => r.category === "Diabetes" && ["Active","High","Critical"].includes(r.status))) {
+    add("HbA1c every 3 months", "Recommended", "Raised/active diabetes record");
+    add("Yearly diabetic eye (retina) exam and urine albumin (kidney) test", "Recommended", "Raised/active diabetes record");
+  }
+  return out;
+}
+
+// ---------- doctor summary ----------
+function summaryData(name) {
+  const m = memberByName(name), recs = mine("records", name), age = ageYears(m.dob);
+  const val = r => r.value == null ? "" : `${fmtNum(r.value)} ${r.unit || ""}`.trim();
+  const latest = latestLabs(recs).sort((a, b) => a.category.localeCompare(b.category) || a.biomarker.localeCompare(b.biomarker));
+  const nonLab = recs.filter(r => !LAB_CATS.includes(r.category));
+  const byDateDesc = (k) => (a, b) => String(b[k]).localeCompare(String(a[k]));
+  return {
+    title: `Health summary: ${name}`, sub: `Prepared ${fmtDate(today())}`,
+    facts: [["Age", age !== null ? `${age} (born ${fmtDate(m.dob)})` : "unknown"], ["Gender", m.gender], ["Blood group", m.blood_group],
+            ["Allergies", m.allergies], ["Chronic conditions", m.conditions], ["History / notes", m.medical_notes],
+            ["Family doctor", m.doctor], ["Emergency contact", m.emergency]].filter(f => f[1]),
+    tables: [
+      {title: "Current medicines", cols: ["Medicine","Dosage","When","Since","Prescribed by"],
+       rows: mine("medicines", name).filter(isActiveMed).map(x => [x.name, x.dosage, x.frequency, fmtDate(x.start_date), x.prescribed_by])},
+      {title: "Active conditions & treatments", cols: ["Category","Item","Since","Notes"],
+       rows: nonLab.filter(r => r.status === "Active").map(r => [r.category, r.biomarker, fmtDate(r.test_date), r.notes])},
+      {title: "Abnormal latest lab values", cols: ["Test","Value","Normal range","Status","Date"],
+       rows: labAlerts(recs).map(r => [r.biomarker, val(r), fmtRange(r.ref_low, r.ref_high), r.status, fmtDate(r.test_date)])},
+      {title: "Latest lab values", cols: ["Category","Test","Value","Normal range","Status","Date"],
+       rows: latest.map(r => [r.category, r.biomarker, val(r), fmtRange(r.ref_low, r.ref_high), r.status, fmtDate(r.test_date)])},
+      {title: "Recent doctor visits", cols: ["Date","Doctor","Reason","Diagnosis","Advice"],
+       rows: mine("visits", name).sort(byDateDesc("visit_date")).slice(0, 6).map(v => [fmtDate(v.visit_date), v.doctor, v.reason, v.diagnosis, v.prescription])},
+      {title: "Past history (surgery, scans, resolved)", cols: ["Date","Category","Item","Status","Notes"],
+       rows: nonLab.filter(r => r.status !== "Active").sort(byDateDesc("test_date")).map(r => [fmtDate(r.test_date), r.category, r.biomarker, r.status, r.notes])},
+      {title: "Vaccinations", cols: ["Vaccine","Dose","Given","Next due"],
+       rows: mine("vaccines", name).sort(byDateDesc("date_given")).map(v => [v.name, v.dose, fmtDate(v.date_given), fmtDate(v.next_due)])},
+      {title: "Pending follow-ups", cols: ["Task","Due","Urgency"],
+       rows: mine("tasks", name).filter(t => t.status !== "Completed").map(t => [t.task, fmtDate(t.due_date), t.urgency])},
+    ],
+  };
+}
+function summaryMarkdown(s) {
+  const cell = v => String(v == null ? "" : v).replace(/\|/g, "/").replace(/\n/g, " ");
+  let md = `# ${s.title}\n*${s.sub}*\n\n` + s.facts.map(([k, v]) => `- **${k}:** ${cell(v)}`).join("\n") + "\n";
+  for (const t of s.tables) {
+    md += `\n## ${t.title}\n`;
+    md += t.rows.length ? `| ${t.cols.join(" | ")} |\n|${t.cols.map(() => "---").join("|")}|\n` +
+      t.rows.map(r => `| ${r.map(cell).join(" | ")} |`).join("\n") + "\n" : "None recorded.\n";
+  }
+  return md;
+}
+function summaryHTML(s) {
+  return `<div class="summary"><h1>${esc(s.title)}</h1><div class="muted">${esc(s.sub)}</div>
+    <dl class="facts">${s.facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+    ${s.tables.map(t => `<h2>${esc(t.title)}</h2>` + (t.rows.length
+      ? `<table><thead><tr>${t.cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${t.rows.map(r => `<tr>${r.map(v => `<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table>`
+      : `<div class="muted">None recorded.</div>`)).join("")}</div>`;
+}
+
+// ---------- charts (plain SVG, no libraries) ----------
+function niceTicks(min, max, count) {
+  const raw = (max - min) / count, mag = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / mag;
+  const step = (n < 1.5 ? 1 : n < 3 ? 2 : n < 7 ? 5 : 10) * mag, out = [];
+  for (let v = Math.ceil(min / step) * step; v <= max + 1e-9; v += step) out.push(Math.round(v * 1e6) / 1e6);
+  return out;
+}
+// Axis label: "12 Mar" for spans under ~13 months, "Mar 2026" for longer ones.
+const tickLabel = (t, span) => new Date(t).toLocaleDateString("en-IN", span < 400 * 864e5 ? {day: "numeric", month: "short"} : {month: "short", year: "numeric"});
+// series: [{name, color, points:[{date, value, status, tip}]}], band: {lo, hi}
+function lineChart({series, band, small = false, label = "chart"}) {
+  const narrow = window.innerWidth < 640;   // smaller drawing width on phones = bigger text
+  const W = small ? 240 : narrow ? 420 : 860, H = small ? 70 : narrow ? 260 : 280, L = small ? 4 : 48, R = small ? 4 : 16, T = small ? 6 : 14, B = small ? 6 : 30;
+  const pts = series.flatMap(s => s.points);
+  if (!pts.length) return "";
+  let x0 = Math.min(...pts.map(p => ms(p.date))), x1 = Math.max(...pts.map(p => ms(p.date)));
+  if (x0 === x1) { x0 -= 30 * 864e5; x1 += 30 * 864e5; }
+  const ys = pts.map(p => p.value);
+  const lo = band ? num(band.lo) : null, hi = band ? num(band.hi) : null;
+  if (lo !== null) ys.push(lo); if (hi !== null) ys.push(hi);
+  let y0 = Math.min(...ys), y1 = Math.max(...ys);
+  if (y0 === y1) { y0 -= 1; y1 += 1; }
+  const pad = (y1 - y0) * 0.1; y0 -= pad; y1 += pad;
+  if (Math.min(...ys) >= 0 && y0 < 0) y0 = 0;
+  const X = t => L + (t - x0) / (x1 - x0) * (W - L - R), Y = v => T + (y1 - v) / (y1 - y0) * (H - T - B);
+  let g = "";
+  if (lo !== null || hi !== null) {
+    const top = Y(hi !== null ? hi : y1), bot = Y(lo !== null ? lo : y0);
+    g += `<rect x="${L}" y="${top.toFixed(1)}" width="${W - L - R}" height="${Math.max(0, bot - top).toFixed(1)}" fill="var(--band)"/>`;
+  }
+  if (!small) {
+    for (const t of niceTicks(y0, y1, 4))
+      g += `<line x1="${L}" x2="${W - R}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}" class="gl"/><text x="${L - 6}" y="${(Y(t) + 4).toFixed(1)}" text-anchor="end" class="ax">${t}</text>`;
+    const nx = narrow ? 3 : 5;
+    for (let i = 0; i < nx; i++) {
+      const t = x0 + (x1 - x0) * i / (nx - 1);
+      g += `<text x="${X(t).toFixed(1)}" y="${H - 8}" text-anchor="${i === 0 ? "start" : i === nx - 1 ? "end" : "middle"}" class="ax">${tickLabel(t, x1 - x0)}</text>`;
+    }
+  }
+  series.forEach((s, i) => {
+    const col = s.color || SERIES_COLORS[i % SERIES_COLORS.length];
+    const sp = s.points.slice().sort((a, b) => ms(a.date) - ms(b.date));
+    if (sp.length > 1) g += `<polyline fill="none" stroke="${col}" stroke-width="${small ? 1.8 : 2.2}" stroke-linejoin="round" points="${sp.map(p => X(ms(p.date)).toFixed(1) + "," + Y(p.value).toFixed(1)).join(" ")}"/>`;
+    for (const p of sp)
+      g += `<circle cx="${X(ms(p.date)).toFixed(1)}" cy="${Y(p.value).toFixed(1)}" r="${small ? 2.8 : 5.5}" fill="${STATUS_COLOR[p.status] || col}" stroke="var(--card)" stroke-width="1.5"${small ? "" : ` tabindex="0" data-tip="${esc(p.tip)}"`}/>`;
+  });
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}">${g}</svg>`;
+}
+function recordTip(r) {
+  return [fmtDate(r.test_date), `${r.biomarker}: ${fmtNum(r.value)} ${r.unit || ""}`.trim(),
+          r.status ? `Status: ${r.status}` : "", fmtRange(r.ref_low, r.ref_high) ? `Normal: ${fmtRange(r.ref_low, r.ref_high)}` : "",
+          r.notes || ""].filter(Boolean).join("\n");
+}
+const toPoint = r => ({date: r.test_date, value: r.value, status: r.status, tip: recordTip(r)});
+function bandOf(rows) {
+  const withRef = rows.filter(r => r.ref_low != null || r.ref_high != null).sort((a, b) => a.test_date.localeCompare(b.test_date));
+  const l = withRef[withRef.length - 1];
+  return l ? {lo: l.ref_low, hi: l.ref_high} : null;
+}
+function timelineChart(name) {
+  const todayMs = ms(today());
+  const rowsDef = [
+    ["Doctor visits", mine("visits", name).filter(v => isDate(v.visit_date)).map(v => ({d: v.visit_date, c: "#2f6fb3",
+      tip: `${fmtDate(v.visit_date)}\nVisit${v.doctor ? " – " + v.doctor : ""}${v.reason ? "\n" + v.reason : ""}${v.diagnosis ? "\nDiagnosis: " + v.diagnosis : ""}`}))],
+    ["Surgery & scans", mine("records", name).filter(r => PROCEDURE_CATS.includes(r.category) && isDate(r.test_date)).map(r => ({d: r.test_date, c: "#c2408a",
+      tip: `${fmtDate(r.test_date)}\n${r.category}: ${r.biomarker}${r.notes ? "\n" + r.notes : ""}`}))],
+    ["Conditions", mine("records", name).filter(r => ["Clinical","Medication"].includes(r.category) && r.value == null && isDate(r.test_date)).map(r => ({d: r.test_date, c: "#d9822b",
+      tip: `${fmtDate(r.test_date)}\n${r.biomarker}${r.status ? " (" + r.status + ")" : ""}${r.notes ? "\n" + r.notes : ""}`}))],
+    ["Vaccines", mine("vaccines", name).filter(v => isDate(v.date_given)).map(v => ({d: v.date_given, c: "#2e9e6b",
+      tip: `${fmtDate(v.date_given)}\n${v.name}${v.dose ? " – " + v.dose : ""}`}))],
+    ["Lab tests", [...new Set(mine("records", name).filter(r => LAB_CATS.includes(r.category) && isDate(r.test_date)).map(r => r.test_date))].map(d => ({d, c: "#7a5cc2",
+      tip: `${fmtDate(d)}\nLab tests: ${mine("records", name).filter(r => r.test_date === d && LAB_CATS.includes(r.category)).map(r => r.biomarker).join(", ")}`}))],
+  ].filter(r => r[1].length);
+  const meds = mine("medicines", name).filter(m => isDate(m.start_date));
+  const all = rowsDef.flatMap(r => r[1].map(p => ms(p.d))).concat(meds.map(m => ms(m.start_date)));
+  if (!all.length) return "";
+  let x0 = Math.min(...all), x1 = Math.max(todayMs, ...all);
+  if (x1 - x0 < 60 * 864e5) x0 = x1 - 60 * 864e5;
+  const narrow = window.innerWidth < 640, W = narrow ? 420 : 680, L = narrow ? 96 : 118, R = 14, rowH = 30, medH = 16, nx = narrow ? 3 : 5;
+  const H = 12 + rowsDef.length * rowH + (meds.length ? 24 + meds.length * medH : 0) + 26;
+  const X = t => L + (t - x0) / (x1 - x0) * (W - L - R);
+  let g = "", y = 12;
+  rowsDef.forEach(([label, pts]) => {
+    const cy = y + rowH / 2;
+    g += `<text x="0" y="${cy + 4}" class="ax">${esc(label)}</text><line x1="${L}" x2="${W - R}" y1="${cy}" y2="${cy}" class="gl"/>`;
+    pts.forEach(p => g += `<circle cx="${X(ms(p.d)).toFixed(1)}" cy="${cy}" r="6" fill="${p.c}" stroke="var(--card)" stroke-width="1.5" tabindex="0" data-tip="${esc(p.tip)}"/>`);
+    y += rowH;
+  });
+  if (meds.length) {
+    y += 6; g += `<text x="0" y="${y + 10}" class="ax">Medicines</text>`; y += 18;
+    meds.sort((a, b) => a.start_date.localeCompare(b.start_date)).forEach(m => {
+      const s = X(ms(m.start_date)), e = X(Math.max(ms(m.start_date) + 864e5, isDate(m.end_date) ? Math.min(ms(m.end_date), x1) : todayMs));
+      g += `<rect x="${s.toFixed(1)}" y="${y + 3}" width="${Math.max(4, e - s).toFixed(1)}" height="${medH - 6}" rx="4" fill="${isActiveMed(m) ? "#1f7a6d" : "#8a94a6"}" tabindex="0"
+        data-tip="${esc(`${m.name}${m.dosage ? " " + m.dosage : ""}\n${fmtDate(m.start_date)} → ${m.end_date ? fmtDate(m.end_date) : "ongoing"}${m.frequency ? "\n" + m.frequency : ""}`)}"/>`;
+      g += `<text x="${L - 6}" y="${y + 11}" text-anchor="end" class="ax">${esc(m.name.slice(0, 16))}</text>`;
+      y += medH;
+    });
+  }
+  for (let i = 0; i < nx; i++) {
+    const t = x0 + (x1 - x0) * i / (nx - 1);
+    g += `<text x="${X(t).toFixed(1)}" y="${H - 6}" text-anchor="${i === 0 ? "start" : i === nx - 1 ? "end" : "middle"}" class="ax">${tickLabel(t, x1 - x0)}</text>`;
+  }
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Health timeline">${g}</svg>`;
+}
+
+// ===================================================================
+// Views
+// ===================================================================
+const TABS = [["family","Family"],["advice","Health & Advice"],["trends","Trends"],["history","History"],
+              ["medicines","Medicines"],["vaccines","Vaccines"],["visits","Visits"],["add","Add / PDF"]];
+
+function render() {
+  try { sessionStorage.setItem("fh.ui2", JSON.stringify(state)); } catch (e) {}
+  if (state.filter && !memberByName(state.filter)) state.filter = "";
+  const f = $("#filter");
+  f.innerHTML = `<option value="">Whole family</option>` + sortedMembers().map(m => `<option value="${esc(m.name)}">${esc(m.name)}</option>`).join("");
+  f.value = state.filter;
+  $("#tabs").innerHTML = TABS.map(([k, l]) => `<button data-tab="${k}" class="${state.tab === k ? "on" : ""}">${l}</button>`).join("");
+  const views = {family: viewFamily, advice: viewAdvice, trends: viewTrends, history: viewHistory,
+                 medicines: () => tableView("medicines"), vaccines: () => tableView("vaccines"), visits: () => tableView("visits"), add: viewAdd};
+  const body = db.members.length ? views[state.tab]() : viewWelcome();
+  $("#view").innerHTML = (flash ? `<div class="flash">${esc(flash)}</div>` : "") + banner() + body;
+  flash = "";
+  if (state.tab === "history" && db.members.length) renderHistoryTable();
+}
+function banner() {
+  if (!storageOk) return `<div class="banner">This browser is blocking storage, so changes will be lost when the page closes. Use Backup to keep them, or open the file in Chrome/Edge/Safari normally (not a private window).</div>`;
+  if (!TABLES.some(t => db[t].length)) return "";
+  if (syncReady() && syncCfg.last) return "";            // the GitHub copy is the backup
+  const last = db.meta.lastExport;
+  if (!last) return `<div class="banner">Your records live only in this browser on this device. Click <b>Backup</b> now and then and keep the file somewhere safe (e.g. Google Drive).</div>`;
+  if (daysUntil(last.slice(0, 10)) < -30) return `<div class="banner">Last backup was ${fmtDate(last.slice(0, 10))}. Time for a fresh one.</div>`;
+  return "";
+}
+function viewWelcome() {
+  return `<div class="card empty"><h2 style="margin-bottom:8px">Welcome</h2>
+    <p>Start by adding your family members, or import a backup file.</p>
+    <button class="btn" data-add="members">Add family member</button> <button class="btn ghost" data-act="import">Import backup</button></div>`;
+}
+const pickMemberNote = what => `<div class="card empty">Pick a family member at the top (“Showing”) to see ${what}.</div>`;
+
+// ----- Family -----
+function memberCard(m) {
+  const meds = mine("medicines", m.name).filter(isActiveMed);
+  const lastVisit = mine("visits", m.name).sort((a, b) => b.visit_date.localeCompare(a.visit_date))[0];
+  const alerts = labAlerts(mine("records", m.name));
+  return `<div class="card">
+    <div class="row tight"><h3>${esc(m.name)}</h3>
+      <span><button class="btn sm ghost" data-edit="members" data-id="${m.id}">Edit</button>
+      <button class="btn sm" data-open-member="${esc(m.name)}">Open</button></span></div>
+    <div class="muted">${[m.relation, ageLabel(m.dob), m.gender].filter(Boolean).map(esc).join(" · ") || "&nbsp;"}</div>
+    <div style="margin-top:6px">${m.blood_group ? chip("Blood " + m.blood_group, "ok") : ""}
+      ${splitList(m.allergies).map(a => chip("Allergy: " + a, "bad")).join("")}
+      ${splitList(m.conditions).map(c => chip(c, "warn")).join("")}
+      ${alerts.length ? chip(`${alerts.length} lab alert${alerts.length > 1 ? "s" : ""}`, "bad") : ""}</div>
+    <dl class="facts">
+      <dt>Medicines</dt><dd>${meds.length ? meds.map(x => esc(x.name + (x.dosage ? " " + x.dosage : ""))).join(", ") : '<span class="muted">none</span>'}</dd>
+      <dt>Last visit</dt><dd>${lastVisit ? esc(fmtDate(lastVisit.visit_date) + (lastVisit.reason ? " – " + lastVisit.reason : "")) : '<span class="muted">none</span>'}</dd>
+      ${m.doctor ? `<dt>Doctor</dt><dd>${esc(m.doctor)}</dd>` : ""}
+      ${m.emergency ? `<dt>Emergency</dt><dd>${esc(m.emergency)}</dd>` : ""}
+      ${m.insurance ? `<dt>Insurance</dt><dd>${esc(m.insurance)}</dd>` : ""}
+    </dl></div>`;
+}
+function upcomingItem(u, showMember) {
+  return `<div class="item"><span class="date">${fmtDate(u.date)}</span>${dueChip(u.date)}
+    <span class="grow">${esc(u.title)}${showMember ? ` <span class="muted">· ${esc(u.member)}</span>` : ""}</span>
+    <button class="btn sm" data-act="done" data-kind="${u.kind}" data-id="${u.id}" data-field="${u.field || ""}" title="Mark done">Done</button>
+    <button class="btn sm ghost" data-edit="${u.kind}" data-id="${u.id}">Open</button></div>`;
+}
+function viewFamily() {
+  const name = scopeName();
+  const soon = upcoming(name).filter(u => daysUntil(u.date) <= 30);
+  const people = sortedMembers().filter(m => !name || m.name === name);
+  return `<div class="section"><div class="row"><h2>Coming up (next 30 days & overdue)</h2>
+      <button class="btn sm" data-add="tasks">Add reminder</button></div>
+    <div class="card list">${soon.length ? soon.map(u => upcomingItem(u, !name)).join("") : '<div class="muted">Nothing due. 🎉</div>'}</div></div>
+    <div class="section"><div class="row"><h2>${name ? "Profile" : "Family"}</h2><button class="btn sm" data-add="members">Add member</button></div>
+    <div class="grid">${people.map(memberCard).join("")}</div></div>`;
+}
+
+// ----- Health & Advice -----
+function adviceFor(m) {
+  const recs = mine("records", m.name), age = ageYears(m.dob), tasks = mine("tasks", m.name);
+  const taskTexts = new Set(tasks.map(t => lower(t.task)));
+  const meds = mine("medicines", m.name).filter(isActiveMed);
+  const active = recs.filter(r => !LAB_CATS.includes(r.category) && r.status === "Active");
+  const alerts = labAlerts(recs);
+  const pending = tasks.filter(t => t.status !== "Completed")
+    .sort((a, b) => URGENCIES.indexOf(a.urgency) - URGENCIES.indexOf(b.urgency) || (a.due_date || "9").localeCompare(b.due_date || "9"));
+  const done = tasks.filter(t => t.status === "Completed");
+  const auto = upcoming(m.name).filter(u => u.kind !== "tasks");
+  const addTaskBtn = (text, urg, notes) => taskTexts.has(lower(text)) ? `<span class="muted small-text">on roadmap ✓</span>`
+    : `<button class="btn sm ghost" data-act="addtask" data-member="${esc(m.name)}" data-text="${esc(text)}" data-urg="${urg}" data-notes="${esc(notes || "")}">Add</button>`;
+
+  return `<div class="cols2">
+    <div>
+      <div class="card section"><h3>Active clinical summary</h3>
+        <div>${splitList(m.allergies).map(a => chip("Allergy: " + a, "bad")).join("")}${splitList(m.conditions).map(c => chip(c, "warn")).join("")}</div>
+        <dl class="facts">
+          <dt>Medicines</dt><dd>${meds.length ? meds.map(x => esc([x.name, x.dosage, x.frequency].filter(Boolean).join(" · "))).join("<br>") : '<span class="muted">none</span>'}</dd>
+          <dt>Active</dt><dd>${active.length ? active.map(r => esc(`${r.biomarker} (${r.category}, since ${fmtDate(r.test_date)})`)).join("<br>") : '<span class="muted">none recorded</span>'}</dd>
+          ${m.medical_notes ? `<dt>History</dt><dd>${esc(m.medical_notes)}</dd>` : ""}
+        </dl></div>
+      <div class="card section"><h3>Lab alerts (latest readings)</h3>
+        <div class="list">${alerts.length ? alerts.map(r => `<div class="item">${statusChip(r.status)}
+          <span class="grow"><b>${esc(r.biomarker)}</b> ${esc(fmtNum(r.value))} ${esc(r.unit)} <span class="muted small-text">· normal ${esc(fmtRange(r.ref_low, r.ref_high))} · ${fmtDate(r.test_date)}</span></span>
+          ${addTaskBtn(`Review ${r.biomarker} (${r.status}, ${r.test_date}) with doctor`, r.status === "Critical" ? "Immediate" : "Recommended", `${fmtNum(r.value)} ${r.unit || ""}, normal ${fmtRange(r.ref_low, r.ref_high)}`)}
+          </div>`).join("") : `<div class="muted">${recs.some(r => r.value != null) ? "No abnormal values in the latest results." : "No lab results yet."}</div>`}</div></div>
+    </div>
+    <div class="card section"><h3>Preventive recommendations (age ${age !== null ? age : "?"})</h3>
+      <div class="muted small-text">General screening reminders to discuss with your doctor, not medical advice.</div>
+      <div class="list">${recommendations(age, m.gender, recs).map(r => `<div class="item"><span class="grow">${chip(r.urgency, r.urgency === "Recommended" ? "warn" : "")} ${esc(r.task)}
+        <span class="muted small-text">· ${esc(r.why)}</span></span>${addTaskBtn(r.task, r.urgency, r.why)}</div>`).join("")}</div></div>
+  </div>
+  <div class="card section"><div class="row tight"><h3>Preventive roadmap & reminders</h3>
+      <button class="btn sm" data-add="tasks" data-member="${esc(m.name)}">Add follow-up</button></div>
+    <div class="list">${pending.length || auto.length ? "" : '<div class="muted">No pending tasks.</div>'}
+      ${pending.map(t => `<div class="item"><label class="grow"><input type="checkbox" data-complete="${t.id}">
+        <span>${chip(t.urgency, t.urgency === "Immediate" ? "bad" : t.urgency === "Recommended" ? "warn" : "")} ${esc(t.task)}
+        ${t.due_date ? `<span class="muted small-text">· due ${fmtDate(t.due_date)}</span> ${dueChip(t.due_date)}` : ""}</span></label>
+        <button class="btn sm ghost" data-edit="tasks" data-id="${t.id}">Edit</button></div>`).join("")}
+      ${auto.map(u => upcomingItem(u, false)).join("")}
+    </div>
+    ${done.length ? `<details style="margin-top:8px"><summary class="muted">Completed (${done.length})</summary><div class="list">
+      ${done.map(t => `<div class="item"><span class="grow muted"><s>${esc(t.task)}</s></span>
+        <button class="btn sm ghost" data-act="reopen" data-id="${t.id}">Reopen</button>
+        <button class="btn sm ghost" data-edit="tasks" data-id="${t.id}">Edit</button></div>`).join("")}</div></details>` : ""}
+  </div>`;
+}
+function viewAdvice() {
+  const name = scopeName();
+  if (name) return `<div class="row"><h2>${esc(name)} — health & advice</h2><button class="btn sm ghost" data-act="summary" data-member="${esc(name)}">Doctor summary</button></div>` + adviceFor(memberByName(name));
+  return sortedMembers().map((m, i) => `<details class="section" ${i === 0 ? "open" : ""}><summary><h2 style="display:inline">${esc(m.name)}</h2>
+    <span class="muted"> · ${labAlerts(mine("records", m.name)).length} alerts · ${mine("tasks", m.name).filter(t => t.status !== "Completed").length} pending</span></summary>
+    <div style="margin-top:10px">${adviceFor(m)}</div></details>`).join("");
+}
+
+// ----- Trends -----
+function viewTrends() {
+  const name = scopeName();
+  const numeric = mine("records", name).filter(r => r.value != null && isDate(r.test_date));
+  const actions = `<span><button class="btn sm" data-act="vitals">Log vitals</button> <button class="btn sm ghost" data-add="records">Add lab result</button></span>`;
+  if (!numeric.length) return `<div class="row"><h2>Trends</h2>${actions}</div><div class="card empty">No results with numbers yet. Log vitals or add lab results (or read a lab PDF in “Add / PDF”).</div>`;
+
+  const cats = CATEGORIES.filter(c => numeric.some(r => r.category === c));
+  if (!cats.includes(state.trendCat)) { state.trendCat = cats[0]; state.trendTest = ""; }
+  const inCat = numeric.filter(r => r.category === state.trendCat);
+  const tests = []; const seenT = new Set();
+  inCat.forEach(r => { if (!seenT.has(lower(r.biomarker))) { seenT.add(lower(r.biomarker)); tests.push(r.biomarker.trim()); } });
+  tests.sort((a, b) => a.localeCompare(b));
+  if (!tests.some(t => lower(t) === lower(state.trendTest))) state.trendTest = tests[0];
+  const rows = inCat.filter(r => lower(r.biomarker) === lower(state.trendTest));
+  const members = [...new Set(rows.map(r => r.member_name))].sort();
+  const series = members.map((mn, i) => ({name: mn, color: SERIES_COLORS[i % SERIES_COLORS.length], points: rows.filter(r => r.member_name === mn).map(toPoint)}));
+  const sorted = rows.slice().sort((a, b) => a.test_date.localeCompare(b.test_date));
+  const last = sorted[sorted.length - 1], unit = (sorted.filter(r => r.unit).pop() || {}).unit || "";
+
+  let html = `<div class="row"><h2>Trends${name ? " — " + esc(name) : " — whole family"}</h2>${actions}</div>
+    <div class="card section">
+      <div class="fields" style="margin-bottom:10px">
+        <label>Category<select data-bind="trendCat">${cats.map(c => `<option ${c === state.trendCat ? "selected" : ""}>${c}</option>`).join("")}</select></label>
+        <label>Test<select data-bind="trendTest">${tests.map(t => `<option ${lower(t) === lower(state.trendTest) ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label>
+      </div>
+      <h3>${esc(state.trendTest)}${unit ? ` <span class="muted">(${esc(unit)})</span>` : ""}</h3>
+      ${lineChart({series, band: bandOf(rows), label: state.trendTest + " over time"})}
+      ${!name && members.length > 1 ? `<div class="legend">${series.map(s => `<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join("")}</div>` : ""}
+      <div class="small-text muted" style="margin-top:6px">${name ? `Latest ${esc(fmtNum(last.value))} ${esc(unit)} on ${fmtDate(last.date || last.test_date)} ${statusChip(last.status)} · ${rows.length} reading${rows.length > 1 ? "s" : ""}` :
+        "Comparing family members. Lines are coloured by person; dot colour shows status."}
+        · Green band = normal range${bandOf(rows) ? ` (${esc(fmtRange(bandOf(rows).lo, bandOf(rows).hi))} ${esc(unit)})` : ""} from the latest report. Tap a dot for details.</div>
+    </div>`;
+
+  if (!name) return html + pickMemberNote("every test at a glance, blood pressure and the health timeline");
+
+  // Blood pressure: systolic and diastolic on one chart
+  const sys = numeric.filter(r => /systolic/i.test(r.biomarker)), dia = numeric.filter(r => /diastolic/i.test(r.biomarker));
+  if (sys.length || dia.length) {
+    html += `<div class="card section"><h3>Blood pressure <span class="muted">(mmHg)</span></h3>
+      ${lineChart({series: [{name: "Systolic", color: "#d9534f", points: sys.map(toPoint)}, {name: "Diastolic", color: "#2f6fb3", points: dia.map(toPoint)}], label: "Blood pressure over time"})}
+      <div class="legend"><span><i style="background:#d9534f"></i>Systolic (normal under 120)</span><span><i style="background:#2f6fb3"></i>Diastolic (normal under 80)</span></div></div>`;
+  }
+
+  // All tests at a glance
+  const groups = new Map();
+  numeric.forEach(r => { const k = r.category + "|||" + lower(r.biomarker); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(r); });
+  const cards = [...groups.values()].filter(g => g.length >= 2).sort((a, b) => CATEGORIES.indexOf(a[0].category) - CATEGORIES.indexOf(b[0].category) || a[0].biomarker.localeCompare(b[0].biomarker))
+    .map(g => { g.sort((a, b) => a.test_date.localeCompare(b.test_date)); const l = g[g.length - 1];
+      return `<div class="card click" data-trend="${esc(l.category + "|||" + l.biomarker.trim())}">
+        <div class="row tight"><b>${esc(l.biomarker)}</b>${statusChip(l.status)}</div>
+        <div class="muted small-text">${esc(l.category)} · latest ${esc(fmtNum(l.value))} ${esc(l.unit)} · ${g.length} readings</div>
+        ${lineChart({series: [{points: g.map(toPoint)}], band: bandOf(g), small: true, label: l.biomarker})}</div>`; }).join("");
+  html += `<div class="section"><div class="row"><h2>All tests at a glance</h2><span class="muted small-text">Tests with 2+ readings · tap to open</span></div>
+    ${cards ? `<div class="grid small">${cards}</div>` : `<div class="card muted">Charts appear here once a test has two or more readings.</div>`}</div>`;
+
+  const tl = timelineChart(name);
+  html += `<div class="section"><div class="row"><h2>Health timeline</h2><span class="muted small-text">Visits, procedures, vaccines, lab days and medicines</span></div>
+    <div class="card">${tl || '<div class="muted">Add visits, medicines, vaccines or records to see the timeline.</div>'}</div></div>`;
+  return html;
+}
+
+// ----- History -----
+function historyRows() {
+  const name = scopeName(), out = [];
+  mine("records", name).forEach(r => out.push({kind: "records", id: r.id, member: r.member_name, date: r.test_date, type: r.category, item: r.biomarker,
+    detail: r.value != null ? `${fmtNum(r.value)} ${r.unit || ""}`.trim() + (fmtRange(r.ref_low, r.ref_high) ? ` (normal ${fmtRange(r.ref_low, r.ref_high)})` : "") : "",
+    status: r.status || "", notes: r.notes || ""}));
+  mine("visits", name).forEach(v => out.push({kind: "visits", id: v.id, member: v.member_name, date: v.visit_date, type: "Visit", item: v.reason || "Doctor visit",
+    detail: [v.doctor, v.hospital, v.diagnosis && "Diagnosis: " + v.diagnosis].filter(Boolean).join(" · "), status: "", notes: [v.prescription, v.notes].filter(Boolean).join(" · ")}));
+  mine("medicines", name).forEach(m => out.push({kind: "medicines", id: m.id, member: m.member_name, date: m.start_date, type: "Medicine", item: [m.name, m.dosage].filter(Boolean).join(" "),
+    detail: [m.frequency, m.prescribed_by && "by " + m.prescribed_by].filter(Boolean).join(" · "), status: isActiveMed(m) ? "Active" : "Resolved", notes: m.notes || ""}));
+  mine("vaccines", name).forEach(v => out.push({kind: "vaccines", id: v.id, member: v.member_name, date: v.date_given, type: "Vaccine", item: v.name,
+    detail: [v.dose, v.next_due && "next due " + fmtDate(v.next_due)].filter(Boolean).join(" · "), status: "", notes: v.notes || ""}));
+  return out.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+}
+function filteredHistory() {
+  const h = state.hist, q = lower(h.q);
+  return historyRows().filter(r =>
+    (!q || [r.item, r.detail, r.notes, r.type, r.member].some(v => lower(v).includes(q))) &&
+    (!h.type || r.type === h.type) && (!h.status || r.status === h.status) &&
+    (!h.from || (r.date || "") >= h.from) && (!h.to || (r.date || "") <= h.to));
+}
+function viewHistory() {
+  const h = state.hist, name = scopeName();
+  return `<div class="row"><h2>Medical & lab history${name ? " — " + esc(name) : ""}</h2>
+      <span><button class="btn sm ghost" data-act="csv">Export CSV</button>
+      <button class="btn sm" data-act="summary" data-member="${esc(name || "")}" ${name ? "" : "disabled title='Pick a family member first'"}>Doctor summary</button></span></div>
+    <div class="filters">
+      <label class="q">Search<input data-hist="q" value="${esc(h.q)}" placeholder="vitamin, knee, metformin…"></label>
+      <label>Type<select data-hist="type"><option value="">All</option>${CATEGORIES.concat(["Visit","Medicine","Vaccine"]).map(c => `<option ${c === h.type ? "selected" : ""}>${c}</option>`).join("")}</select></label>
+      <label>Status<select data-hist="status"><option value="">All</option>${STATUSES.map(s => `<option ${s === h.status ? "selected" : ""}>${s}</option>`).join("")}</select></label>
+      <label>From<input type="date" data-hist="from" value="${esc(h.from)}"></label>
+      <label>To<input type="date" data-hist="to" value="${esc(h.to)}"></label>
+    </div>
+    <div id="histTable"></div>`;
+}
+function renderHistoryTable() {
+  const rows = filteredHistory(), total = historyRows().length, name = scopeName();
+  $("#histTable").innerHTML = `<div class="muted small-text" style="margin-bottom:6px">${rows.length} of ${total} entries</div>` + (rows.length ?
+    `<div class="tablewrap"><table><thead><tr><th>Date</th>${name ? "" : "<th>Member</th>"}<th>Type</th><th>Item</th><th>Result / details</th><th>Status</th><th>Notes</th><th></th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td style="white-space:nowrap">${fmtDate(r.date)}</td>${name ? "" : `<td>${esc(r.member)}</td>`}<td>${esc(r.type)}</td><td>${esc(r.item)}</td>
+      <td>${esc(r.detail)}</td><td>${statusChip(r.status)}</td><td class="small-text">${esc(r.notes.length > 80 ? r.notes.slice(0, 80) + "…" : r.notes)}</td>
+      <td class="act"><button class="btn sm ghost" data-edit="${r.kind}" data-id="${r.id}">Edit</button></td></tr>`).join("")}</tbody></table></div>`
+    : `<div class="card empty">Nothing matches.</div>`);
+}
+
+// ----- Medicines / Vaccines / Visits tables -----
+function tableView(kind) {
+  const S = SCHEMA[kind], name = scopeName();
+  const cols = S.cols.filter(c => !(name && c === "member_name"));
+  const dateKey = S.fields.find(f => f.t === "date").k;
+  const rows = mine(kind, name).sort((a, b) => String(b[dateKey] || "").localeCompare(String(a[dateKey] || "")));
+  const label = c => S.fields.find(f => f.k === c).l.replace(/\s*\(.*\)/, "");
+  const cell = (r, c) => { const f = S.fields.find(x => x.k === c); const v = r[c];
+    if (f.t === "date") return fmtDate(v); const s = String(v == null ? "" : v); return esc(s.length > 60 ? s.slice(0, 60) + "…" : s); };
+  const extra = r => kind === "medicines" ? (isActiveMed(r) ? chip("ongoing", "ok") : chip("stopped"))
+    : kind === "vaccines" && isDate(r.next_due) ? dueChip(r.next_due) : kind === "visits" && isDate(r.follow_up) ? dueChip(r.follow_up) : "";
+  return `<div class="row"><h2>${S.title}${name ? " — " + esc(name) : ""}</h2><button class="btn" data-add="${kind}">Add ${S.one}</button></div>
+    ${rows.length ? `<div class="tablewrap"><table><thead><tr>${cols.map(c => `<th>${label(c)}</th>`).join("")}<th></th></tr></thead><tbody>
+      ${rows.map(r => `<tr>${cols.map(c => `<td>${cell(r, c)}</td>`).join("")}<td class="act">${extra(r)} <button class="btn sm ghost" data-edit="${kind}" data-id="${r.id}">Edit</button></td></tr>`).join("")}
+    </tbody></table></div>` : `<div class="card empty">No ${S.title.toLowerCase()} yet.</div>`}`;
+}
+
+// ----- Add / PDF -----
+function viewAdd() {
+  const p = pdfState;
+  let pdfBody = "";
+  if (p && p.loading) pdfBody = `<p>Reading ${esc(p.fileName)}…</p>`;
+  else if (p && p.error) pdfBody = `<div class="banner">${esc(p.error)}</div>`;
+  else if (p && !p.text.trim()) pdfBody = `<div class="banner">No text found in ${esc(p.fileName)}. It is probably a scanned image; type the values in with “Lab result / record” instead.</div>`;
+  else if (p) {
+    pdfBody = `<p>Found <b>${p.rows.length}</b> result line(s) in ${esc(p.fileName)}. Check and fix them, then save.
+      Use the same test name as earlier reports so the trend chart joins them.</p>
+      <datalist id="pdfBioNames">${[...new Set(db.records.map(r => r.biomarker))].sort().map(b => `<option value="${esc(b)}">`).join("")}</datalist>
+      <div class="fields" style="margin-bottom:10px">
+        <label>Family member<select data-pdf="member">${sortedMembers().map(m => `<option ${m.name === p.member ? "selected" : ""}>${esc(m.name)}</option>`).join("")}</select></label>
+        <label>Report / collection date<input type="date" data-pdf="date" value="${esc(p.date)}"></label></div>
+      <div class="tablewrap"><table><thead><tr><th>Category</th><th>Test</th><th>Value</th><th>Unit</th><th>Normal low</th><th>Normal high</th><th>Status</th><th></th></tr></thead><tbody>
+      ${p.rows.map((r, i) => `<tr data-row="${i}">
+        <td><select data-cell="category">${CATEGORIES.map(c => `<option ${c === r.category ? "selected" : ""}>${c}</option>`).join("")}</select></td>
+        <td><input data-cell="biomarker" list="pdfBioNames" value="${esc(r.biomarker)}"></td>
+        <td><input data-cell="value" type="number" step="any" value="${r.value == null ? "" : r.value}"></td>
+        <td><input data-cell="unit" value="${esc(r.unit)}"></td>
+        <td><input data-cell="ref_low" type="number" step="any" value="${r.ref_low == null ? "" : r.ref_low}"></td>
+        <td><input data-cell="ref_high" type="number" step="any" value="${r.ref_high == null ? "" : r.ref_high}"></td>
+        <td class="st">${statusChip(computeStatus(r.value, r.ref_low, r.ref_high))}</td>
+        <td class="act"><button class="btn sm danger" data-act="pdf-del" data-i="${i}" title="Remove row">✕</button></td></tr>`).join("")}
+      </tbody></table></div>
+      <div class="dlg-actions"><button class="btn ghost" data-act="pdf-addrow">Add row</button><button class="btn ghost" data-act="pdf-cancel">Discard</button>
+        <button class="btn" data-act="pdf-save" ${p.rows.length ? "" : "disabled"}>Save ${p.rows.length} result(s)</button></div>
+      <details style="margin-top:10px"><summary class="muted">Show text read from the PDF (to spot anything missed)</summary><pre class="raw">${esc(p.text.slice(0, 30000))}</pre></details>`;
+  }
+  return `<div class="cols2 section">
+    <div class="card"><h3>Add by hand</h3><p class="muted small-text">Lab values get a status automatically from the normal range.
+      For surgeries, scans, conditions or treatments leave the value empty and set status to Active or Resolved.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <button class="btn" data-add="records">Lab result / record</button><button class="btn" data-act="vitals">Log vitals (BP, weight, sugar)</button>
+        <button class="btn ghost" data-add="visits">Doctor visit</button><button class="btn ghost" data-add="medicines">Medicine</button>
+        <button class="btn ghost" data-add="vaccines">Vaccine</button><button class="btn ghost" data-add="tasks">Reminder</button></div></div>
+    <div class="card"><h3>Read a lab report PDF</h3><p class="muted small-text">The PDF is read inside this browser; nothing is uploaded.
+      Works with PDFs downloaded from the lab, not scanned photos.</p>
+      <div class="fields"><label>Report layout<select data-pdf="layout">${Object.keys(LAYOUTS).map(l => `<option ${state.pdfLayout === l ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
+        <label>PDF file<input type="file" id="pdfFile" accept="application/pdf,.pdf"></label></div></div>
+  </div>
+  ${pdfBody ? `<div class="card section">${pdfBody}</div>` : ""}`;
+}
+
+// ===================================================================
+// Dialogs
+// ===================================================================
+const dlg = $("#dlg"), form = $("#dlgForm");
+function showDialog(html, wide = false) { form.onsubmit = e => e.preventDefault(); form.innerHTML = html; dlg.classList.toggle("wide", wide); if (!dlg.open) dlg.showModal(); }
+function closeDialog() { if (dlg.open) dlg.close(); }
+
+function openForm(kind, id, preset) {
+  const S = SCHEMA[kind];
+  if (kind !== "members" && !db.members.length) { alert("Add a family member first."); return; }
+  const base = {member_name: state.filter || (sortedMembers()[0] || {}).name, test_date: today(), visit_date: today(), date_given: today(),
+                start_date: today(), status: kind === "tasks" ? "Pending" : "", urgency: "Recommended", category: state.trendCat || "CBC"};
+  const rec = id ? db[kind].find(r => r.id === id) : Object.assign(base, preset || {});
+  if (!rec) return;
+  const bio = [...new Set(db.records.map(r => r.biomarker))].sort();
+  const input = f => {
+    const v = rec[f.k] == null ? "" : rec[f.k], req = f.req ? "required" : "";
+    if (f.t === "member") return `<select name="${f.k}" ${req}>${sortedMembers().map(m => `<option ${m.name === v ? "selected" : ""}>${esc(m.name)}</option>`).join("")}</select>`;
+    if (f.t === "select") return `<select name="${f.k}" ${req}>${f.opts.map(o => `<option value="${esc(o)}" ${o === v ? "selected" : ""}>${o === "" ? "—" : esc(o)}</option>`).join("")}</select>`;
+    if (f.t === "textarea") return `<textarea name="${f.k}" rows="2">${esc(v)}</textarea>`;
+    return `<input name="${f.k}" type="${f.t || "text"}" ${f.t === "number" ? 'step="any"' : ""} ${f.list ? `list="${f.list}"` : ""} value="${esc(v)}" ${req}>`;
+  };
+  showDialog(`<h2>${id ? "Edit" : "Add"} ${S.one}</h2>
+    <datalist id="bioNames">${bio.map(b => `<option value="${esc(b)}">`).join("")}</datalist>
+    <div class="fields">${S.fields.map(f => `<label class="${f.t === "textarea" || f.wide ? "wide" : ""}">${esc(f.l)}${f.req ? " *" : ""}${input(f)}</label>`).join("")}</div>
+    <div class="dlg-actions">${id ? `<button type="button" class="btn danger" data-act="delete" data-kind="${kind}" data-id="${id}" style="margin-right:auto">Delete</button>` : ""}
+      <button type="button" class="btn ghost" data-act="close">Cancel</button><button class="btn">Save</button></div>`);
+  form.onsubmit = e => {
+    e.preventDefault();
+    const raw = {id: rec.id};
+    S.fields.forEach(f => raw[f.k] = form.elements[f.k].value);
+    const row = normalize(kind, raw);
+    if (kind === "members") {
+      const clash = db.members.find(m => lower(m.name) === lower(row.name) && m.id !== row.id);
+      if (clash) { alert("There is already a family member with this name."); return; }
+      if (id && rec.name !== row.name) {   // rename: keep linked rows attached
+        TABLES.filter(t => t !== "members").forEach(t => db[t].forEach(r => { if (r.member_name === rec.name) r.member_name = row.name; }));
+        if (state.filter === rec.name) state.filter = row.name;
+      }
+    }
+    const list = db[kind], i = list.findIndex(r => r.id === row.id);
+    if (i >= 0) list[i] = row; else list.push(row);
+    save(); closeDialog(); render();
+  };
+}
+
+function openVitals() {
+  if (!db.members.length) { alert("Add a family member first."); return; }
+  showDialog(`<h2>Log vitals</h2><p class="muted small-text">Fill only what you measured. Each value is saved as a record and charted in Trends.</p>
+    <div class="fields">
+      <label>Family member<select name="member">${sortedMembers().map(m => `<option ${m.name === state.filter ? "selected" : ""}>${esc(m.name)}</option>`).join("")}</select></label>
+      <label>Date<input type="date" name="date" value="${today()}" required></label>
+      ${VITALS.map(v => `<label>${esc(v.l)}<input type="number" step="any" name="${v.k}"></label>`).join("")}
+    </div>
+    <div class="dlg-actions"><button type="button" class="btn ghost" data-act="close">Cancel</button><button class="btn">Save</button></div>`);
+  form.onsubmit = e => {
+    e.preventDefault();
+    const member = form.elements.member.value, date = form.elements.date.value;
+    let n = 0;
+    VITALS.forEach(v => { const val = num(form.elements[v.k].value); if (val === null) return;
+      db.records.push(normalize("records", {member_name: member, test_date: date, category: v.cat, biomarker: v.name, value: val, unit: v.unit, ref_low: v.lo, ref_high: v.hi, notes: "Home reading"})); n++; });
+    if (!n) { alert("Enter at least one value."); return; }
+    save(); closeDialog(); flash = `Saved ${n} reading(s) for ${member}.`; render();
+  };
+}
+const VITALS = [
+  {k: "sys", l: "BP systolic (mmHg)", name: "BP systolic", cat: "Vitals", unit: "mmHg", lo: 90, hi: 120},
+  {k: "dia", l: "BP diastolic (mmHg)", name: "BP diastolic", cat: "Vitals", unit: "mmHg", lo: 60, hi: 80},
+  {k: "pulse", l: "Pulse (bpm)", name: "Pulse", cat: "Vitals", unit: "bpm", lo: 60, hi: 100},
+  {k: "weight", l: "Weight (kg)", name: "Weight", cat: "Vitals", unit: "kg", lo: null, hi: null},
+  {k: "fbs", l: "Fasting sugar (mg/dL)", name: "Fasting glucose", cat: "Diabetes", unit: "mg/dL", lo: 70, hi: 100},
+  {k: "ppbs", l: "Sugar 2 h after meal (mg/dL)", name: "Post-meal glucose", cat: "Diabetes", unit: "mg/dL", lo: null, hi: 140},
+];
+
+function openSummary(name) {
+  const s = summaryData(name);
+  showDialog(`${summaryHTML(s)}
+    <div class="dlg-actions"><button type="button" class="btn ghost" data-act="close">Close</button>
+      <button type="button" class="btn ghost" data-act="summary-md" data-member="${esc(name)}">Download .md</button>
+      <button type="button" class="btn" data-act="summary-print" data-member="${esc(name)}">Print / save PDF</button></div>`, true);
+}
+
+// ===================================================================
+// Backup / import / downloads
+// ===================================================================
+function download(filename, text, mime) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], {type: mime}));
+  a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function exportBackup() {
+  db.meta.lastExport = new Date().toISOString(); save();
+  download(`family-health-backup-${today()}.json`, JSON.stringify(db, null, 2), "application/json");
+  render();
+}
+async function handleImportFile(file) {
+  let data;
+  try { data = JSON.parse(await file.text()); } catch (e) { alert("That file is not valid JSON."); return; }
+  let report;
+  try { report = importInto(db, data, true); }
+  catch (e) { alert("Can't import: " + e.message); return; }
+  const added = TABLES.reduce((n, t) => n + report[t].added, 0);
+  pendingImport = data;
+  showDialog(`<h2>Import ${esc(file.name)}</h2>
+    <table><thead><tr><th></th><th>New</th><th>Already here (skipped)</th></tr></thead><tbody>
+    ${TABLES.map(t => `<tr><td>${t}</td><td>${report[t].added}</td><td>${report[t].skipped}</td></tr>`).join("")}</tbody></table>
+    <p class="muted small-text">Nothing already in the app is changed or removed.</p>
+    <div class="dlg-actions"><button type="button" class="btn ghost" data-act="close">Cancel</button>
+      <button type="button" class="btn" data-act="import-go" ${added ? "" : "disabled"}>Import ${added} new row(s)</button></div>`);
+}
+let pendingImport = null;
+const csvCell = v => { const s = String(v == null ? "" : v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+
+// ===================================================================
+// Sync: one encrypted file in a private GitHub repo, shared by all devices.
+// The file is AES-GCM encrypted with a key from the family passphrase (PBKDF2),
+// so GitHub only ever stores unreadable data. Merge is per row: newest edit wins,
+// deletions win over older edits.
+// ===================================================================
+const SYNC_KEY = "familyHealth.sync", GH = "https://api.github.com", KDF_ITER = 310000;
+let syncCfg = null;
+try { syncCfg = JSON.parse(localStorage.getItem(SYNC_KEY)); } catch (e) {}
+const syncReady = () => !!(syncCfg && syncCfg.repo && syncCfg.token && syncCfg.pass);
+function persistCfg() { try { syncCfg ? localStorage.setItem(SYNC_KEY, JSON.stringify(syncCfg)) : localStorage.removeItem(SYNC_KEY); } catch (e) {} }
+
+const syncPayload = d => { const p = {deleted: d.deleted || {}}; TABLES.forEach(t => p[t] = d[t] || []); return p; };
+const byId = (x, y) => x.id < y.id ? -1 : x.id > y.id ? 1 : 0;
+const canonical = p => JSON.stringify({format: "family-health-sync", v: 1,
+  ...Object.fromEntries(TABLES.map(t => [t, p[t] || []])),
+  deleted: Object.fromEntries(Object.keys(p.deleted || {}).sort().map(k => [k, p.deleted[k]]))});
+
+function mergeData(a, b) {
+  const del = Object.assign({}, a.deleted || {});
+  for (const [id, t] of Object.entries(b.deleted || {})) if (!(del[id] >= t)) del[id] = t;
+  const tomb = r => { del[r.id] = Math.max(del[r.id] || 0, r._t || 0, 1); };
+  const out = {deleted: del};
+  for (const t of TABLES) {
+    const rows = new Map();
+    for (const r of [...(a[t] || []), ...(b[t] || [])]) {
+      if (!r || !r.id || del[r.id] >= (r._t || 0)) continue;
+      const cur = rows.get(r.id);
+      if (!cur || (r._t || 0) > (cur._t || 0)) rows.set(r.id, r);
+    }
+    // The same thing entered on two devices (e.g. one backup imported on both): keep one copy.
+    const byKey = new Map();
+    for (const r of rows.values()) {
+      const k = DEDUP_KEY[t](r), cur = byKey.get(k);
+      if (!cur) { byKey.set(k, r); continue; }
+      const rNewer = (r._t || 0) > (cur._t || 0) || ((r._t || 0) === (cur._t || 0) && r.id < cur.id);
+      tomb(rNewer ? cur : r);
+      if (rNewer) byKey.set(k, r);
+    }
+    out[t] = [...byKey.values()].sort(byId);
+  }
+  // Rows follow a renamed member; rows of a deleted member go too (as deleting does on one device).
+  const finalName = new Map(out.members.map(m => [m.id, m.name])), rename = new Map();
+  for (const m of [...(a.members || []), ...(b.members || [])]) if (m && finalName.has(m.id)) rename.set(m.name, finalName.get(m.id));
+  for (const t of TABLES) if (t !== "members") out[t] = out[t].flatMap(r => {
+    const n = rename.get(r.member_name);
+    if (n == null) { tomb(r); return []; }
+    return [n === r.member_name ? r : Object.assign({}, r, {member_name: n})];
+  });
+  return out;
+}
+
+// ---------- encryption ----------
+const b64 = buf => { const u = new Uint8Array(buf); let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+const unb64 = s => Uint8Array.from(atob(String(s).replace(/\s/g, "")), c => c.charCodeAt(0));
+let keyCache = {};
+async function deriveKey(pass, salt, iter) {
+  const id = [pass, salt, iter].join("|");
+  if (keyCache.id === id) return keyCache.key;
+  if (!(window.crypto && crypto.subtle)) throw new Error("This browser can't encrypt here. Open the app over https (e.g. GitHub Pages) or as a local file.");
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey({name: "PBKDF2", salt: unb64(salt), iterations: iter, hash: "SHA-256"},
+    base, {name: "AES-GCM", length: 256}, false, ["encrypt", "decrypt"]);
+  keyCache = {id, key}; return key;
+}
+async function encryptText(text, pass, salt) {
+  const iv = crypto.getRandomValues(new Uint8Array(12)), key = await deriveKey(pass, salt, KDF_ITER);
+  const data = await crypto.subtle.encrypt({name: "AES-GCM", iv}, key, new TextEncoder().encode(text));
+  return JSON.stringify({format: "family-health-encrypted", v: 1, kdf: "PBKDF2-SHA256", iter: KDF_ITER, salt, iv: b64(iv), data: b64(data)});
+}
+async function decryptText(fileText, pass) {
+  let f; try { f = JSON.parse(fileText); } catch (e) { f = null; }
+  if (!f || f.format !== "family-health-encrypted") throw new Error("The file in the repo isn't a Family Health sync file. Pick another file name.");
+  const key = await deriveKey(pass, f.salt, f.iter);
+  try { return {salt: f.salt, text: new TextDecoder().decode(await crypto.subtle.decrypt({name: "AES-GCM", iv: unb64(f.iv)}, key, unb64(f.data)))}; }
+  catch (e) { throw new Error("Wrong passphrase: it must be the same on every device."); }
+}
+
+// ---------- GitHub contents API ----------
+function ghFetch(url, method = "GET", body) {
+  const headers = {Authorization: `Bearer ${syncCfg.token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"};
+  if (body) headers["Content-Type"] = "application/json";
+  return fetch(url, {method, headers, cache: "no-store", body: body ? JSON.stringify(body) : undefined});
+}
+const fileUrl = () => `${GH}/repos/${syncCfg.repo}/contents/${syncCfg.path.split("/").map(encodeURIComponent).join("/")}`;
+function ghError(res) {
+  const why = {401: "GitHub rejected the token (wrong or expired). Make a new one.",
+               403: "The token isn't allowed to change this repo. Give it Contents: Read and write.",
+               404: "Repo not found. Check the name and that the token was given access to it."}[res.status];
+  return new Error(why || `GitHub error ${res.status}.`);
+}
+async function ghRead() {
+  const res = await ghFetch(fileUrl());
+  if (res.status === 404) return null;                       // no file yet (a missing repo shows up on write)
+  if (!res.ok) throw ghError(res);
+  const j = await res.json();
+  let content = j.content;
+  if (!content && j.size) {                                  // files over 1 MB come via the blob API
+    const r2 = await ghFetch(`${GH}/repos/${syncCfg.repo}/git/blobs/${j.sha}`);
+    if (!r2.ok) throw ghError(r2);
+    content = (await r2.json()).content;
+  }
+  return {sha: j.sha, text: atob(String(content || "").replace(/\s/g, ""))};
+}
+
+// ---------- sync ----------
+let syncing = null, syncAgain = false, syncTimer = 0, lastTry = 0, syncState = {s: "off", msg: ""};
+function setSync(s, msg) {
+  syncState = {s, msg};
+  const b = $("#syncBtn"); if (!b) return;
+  const time = syncCfg && syncCfg.last ? new Date(syncCfg.last).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) : "";
+  b.textContent = !syncReady() ? "Set up sync" : s === "busy" ? "Syncing…" : s === "error" ? "⚠ Sync failed" : `✓ Synced ${time}`;
+  b.title = msg || "Sync with GitHub";
+  b.classList.toggle("danger", s === "error");
+}
+function scheduleSync() { if (!syncReady()) return; clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 1500); }
+function syncNow() {
+  if (!syncReady()) return Promise.resolve();
+  if (syncing) { syncAgain = true; return syncing; }
+  lastTry = Date.now();
+  syncing = (async () => {
+    setSync("busy");
+    try {
+      for (let attempt = 0; ; attempt++) {
+        const remote = await ghRead();
+        let theirs = {}, salt;
+        if (remote) { const d = await decryptText(remote.text, syncCfg.pass); theirs = JSON.parse(d.text); salt = d.salt; }
+        else salt = b64(crypto.getRandomValues(new Uint8Array(16)));
+        const merged = mergeData(syncPayload(db), theirs), text = canonical(merged);
+        if (!remote || text !== canonical(syncPayload(theirs))) {
+          const res = await ghFetch(fileUrl(), "PUT", {message: "Family Health sync",
+            content: btoa(await encryptText(text, syncCfg.pass, salt)), ...(remote ? {sha: remote.sha} : {})});
+          if ((res.status === 409 || res.status === 422) && attempt < 3) continue;   // another device synced meanwhile
+          if (!res.ok) throw ghError(res);
+        }
+        applyMerged(merged);
+        break;
+      }
+      syncCfg.last = Date.now(); persistCfg(); setSync("ok");
+    } catch (e) {
+      setSync("error", e && e.message || String(e));
+    } finally {
+      syncing = null;
+      if (syncAgain) { syncAgain = false; scheduleSync(); }
+    }
+  })();
+  return syncing;
+}
+// Edits made while the sync was running are kept: merge again with the current data.
+function applyMerged(merged) {
+  const before = canonical(syncPayload(db)), fin = mergeData(syncPayload(db), merged);
+  TABLES.forEach(t => db[t] = fin[t]); db.deleted = fin.deleted;
+  takeSnapshot(); persist();
+  if (canonical(fin) !== canonical(merged)) syncAgain = true;
+  if (canonical(fin) !== before) render();
+}
+function openSyncSettings() {
+  const c = syncCfg || {};
+  showDialog(`<h2>Sync with GitHub</h2>
+    <p class="muted small-text">Keeps one encrypted copy of all records in a <b>private</b> GitHub repo, so every phone and laptop
+      sees the same data. Set up each device with the same repo and passphrase. Changes sync automatically.</p>
+    ${syncState.s === "error" ? `<div class="banner">${esc(syncState.msg)}</div>` : ""}
+    <div class="fields">
+      <label class="wide">Private repo (owner/name) *<input name="repo" required placeholder="yourname/family-health-data" value="${esc(c.repo || "")}"></label>
+      <label class="wide">File in the repo<input name="path" value="${esc(c.path || "family-health.enc.json")}"></label>
+      <label class="wide">GitHub token *<input name="token" type="password" autocomplete="off" ${c.token ? 'placeholder="(saved: leave empty to keep)"' : "required"}></label>
+      <label class="wide">Family passphrase *<input name="pass" type="password" autocomplete="new-password" minlength="8" ${c.pass ? 'placeholder="(saved: leave empty to keep)"' : "required"}></label>
+    </div>
+    <p class="muted small-text">Token: GitHub → Settings → Developer settings → Fine-grained tokens. Give it only this repo and
+      <i>Contents: Read and write</i>. The token and passphrase are kept in this browser so sync runs on its own.
+      <b>If the passphrase is forgotten the synced copy can't be opened</b> (each device still has its own copy).</p>
+    <div class="dlg-actions">${syncReady() ? `<button type="button" class="btn danger" data-act="sync-off" style="margin-right:auto">Turn off on this device</button>` : ""}
+      <button type="button" class="btn ghost" data-act="close">Cancel</button><button class="btn">Save and sync</button></div>`);
+  form.onsubmit = e => {
+    e.preventDefault();
+    const v = k => form.elements[k].value.trim();
+    const repo = v("repo").replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "").replace(/\/+$/, "");
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) { alert("Repo should look like owner/name, e.g. yourname/family-health-data."); return; }
+    syncCfg = {repo, path: v("path") || "family-health.enc.json", token: v("token") || c.token,
+               pass: form.elements.pass.value || c.pass, last: c.repo === repo ? c.last : 0};
+    persistCfg(); closeDialog(); setSync("busy");
+    syncNow().then(() => { if (syncState.s === "error") openSyncSettings(); else { flash = "Sync is on. This device is up to date."; render(); } });
+  };
+}
+
+// ===================================================================
+// PDF reading (pdf.js is embedded in this file and runs in the page)
+// ===================================================================
+async function extractPdfText(buf) {
+  const lib = globalThis.pdfjsLib;
+  if (!lib) throw new Error("The PDF reader didn't load in this browser.");
+  const pdf = await lib.getDocument({data: new Uint8Array(buf), isEvalSupported: false, disableFontFace: true}).promise;
+  const lines = [];
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page = await pdf.getPage(p), tc = await page.getTextContent();
+    const items = tc.items.filter(i => typeof i.str === "string" && i.str.trim())
+      .map(i => ({s: i.str.trim(), x: i.transform[4], y: i.transform[5], h: Math.abs(i.transform[3]) || 8}))
+      .sort((a, b) => b.y - a.y || a.x - b.x);
+    let cur = null;
+    for (const it of items) {
+      if (cur && Math.abs(cur.y - it.y) <= Math.max(2, it.h * 0.4)) cur.items.push(it);
+      else { cur = {y: it.y, items: [it]}; lines.push(cur); }
+    }
+  }
+  return lines.map(l => l.items.sort((a, b) => a.x - b.x).map(i => i.s).join("  ")).join("\n");
+}
+// Reuse the name of a test already on record so trends stay on one line,
+// e.g. "HbA1c (Glycated Haemoglobin)" -> existing "HbA1c". Ignores bracketed text and case.
+function matchExistingNames(rows) {
+  const core = s => lower(String(s).replace(/\([^)]*\)/g, " ")).replace(/\s+/g, " ").trim();
+  const known = new Map();
+  db.records.forEach(r => { const k = core(r.biomarker); if (k && !known.has(k)) known.set(k, r.biomarker); });
+  return rows.map(r => { const hit = known.get(core(r.biomarker)); return hit ? Object.assign({}, r, {biomarker: hit}) : r; });
+}
+async function handlePdf(file) {
+  if (!file) return;
+  const layout = LAYOUTS[state.pdfLayout] ? state.pdfLayout : "Auto-detect";
+  const member = (pdfState && pdfState.member) || state.filter || sortedMembers()[0].name;
+  pdfState = {fileName: file.name, loading: true, layout, member};
+  render();
+  try {
+    const text = await extractPdfText(await file.arrayBuffer());
+    pdfState = {fileName: file.name, text, layout, member, rows: matchExistingNames(parseLabText(text, layout)), date: findReportDate(text) || today()};
+  } catch (e) {
+    pdfState = {fileName: file.name, layout, member, error: "Could not read this PDF: " + (e && e.message || e)};
+  }
+  render();
+}
+
+// ===================================================================
+// Events
+// ===================================================================
+const ACTIONS = {
+  export: exportBackup,
+  sync: () => { if (!syncReady() || syncState.s === "error") openSyncSettings(); else syncNow(); },
+  "sync-off": () => { if (!confirm("Stop syncing on this device? Records stay here; the GitHub copy is not touched.")) return;
+    syncCfg = null; persistCfg(); setSync("off"); closeDialog(); render(); },
+  import: () => $("#importFile").click(),
+  "import-go": () => { const r = importInto(db, pendingImport); save(); closeDialog(); pendingImport = null;
+    flash = "Imported " + TABLES.filter(t => r[t].added).map(t => `${r[t].added} ${t}`).join(", ") + "."; render(); },
+  close: closeDialog,
+  delete: b => {
+    const {kind, id} = b.dataset, rec = db[kind].find(r => r.id === id);
+    if (kind === "members") {
+      const linked = TABLES.filter(t => t !== "members").reduce((n, t) => n + db[t].filter(r => r.member_name === rec.name).length, 0);
+      if (!confirm(`Delete ${rec.name}${linked ? ` and their ${linked} linked record(s)` : ""}? This can't be undone unless you have a backup.`)) return;
+      TABLES.filter(t => t !== "members").forEach(t => db[t] = db[t].filter(r => r.member_name !== rec.name));
+    } else if (!confirm(`Delete this ${SCHEMA[kind].one}?`)) return;
+    db[kind] = db[kind].filter(r => r.id !== id);
+    save(); closeDialog(); render();
+  },
+  done: b => { const {kind, id, field} = b.dataset, r = db[kind].find(x => x.id === id); if (!r) return;
+    if (kind === "tasks") r.status = "Completed"; else r[field] = "";
+    save(); render(); },
+  reopen: b => { const t = db.tasks.find(x => x.id === b.dataset.id); if (t) { t.status = "Pending"; save(); render(); } },
+  addtask: b => { const d = b.dataset;
+    db.tasks.push(normalize("tasks", {member_name: d.member, task: d.text, urgency: d.urg, status: "Pending", notes: d.notes}));
+    save(); render(); },
+  vitals: openVitals,
+  summary: b => { if (b.dataset.member) openSummary(b.dataset.member); },
+  "summary-md": b => download(`${b.dataset.member}-health-summary-${today()}.md`, summaryMarkdown(summaryData(b.dataset.member)), "text/markdown"),
+  "summary-print": b => {
+    $("#printArea").innerHTML = summaryHTML(summaryData(b.dataset.member));
+    closeDialog(); document.body.classList.add("printing");
+    setTimeout(() => { window.print(); document.body.classList.remove("printing"); }, 50);
+  },
+  csv: () => {
+    const cols = ["date","member","type","item","detail","status","notes"];
+    const text = cols.join(",") + "\n" + filteredHistory().map(r => cols.map(c => csvCell(r[c])).join(",")).join("\n");
+    download(`health-history-${scopeName() || "family"}-${today()}.csv`, "﻿" + text, "text/csv");
+  },
+  "pdf-addrow": () => { pdfState.rows.push({category: "CBC", biomarker: "", value: null, unit: "", ref_low: null, ref_high: null}); render(); },
+  "pdf-del": b => { pdfState.rows.splice(Number(b.dataset.i), 1); render(); },
+  "pdf-cancel": () => { pdfState = null; render(); },
+  "pdf-save": () => {
+    const p = pdfState;
+    if (!isDate(p.date)) { alert("Set the report date first."); return; }
+    const good = p.rows.filter(r => r.biomarker.trim() && r.category);
+    good.forEach(r => db.records.push(normalize("records", Object.assign({}, r, {member_name: p.member, test_date: p.date, notes: `Imported from ${p.fileName}`}))));
+    save(); pdfState = null; flash = `Saved ${good.length} result(s) for ${p.member}. See them in Trends and History.`; render();
+  },
+};
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-tab],[data-add],[data-edit],[data-open-member],[data-trend],[data-act]");
+  if (!b || b.disabled) return;
+  const d = b.dataset;
+  if (d.tab) { state.tab = d.tab; render(); window.scrollTo(0, 0); }
+  else if (d.add) openForm(d.add, null, d.member ? {member_name: d.member} : null);
+  else if (d.edit) openForm(d.edit, d.id);
+  else if (d.openMember !== undefined) { state.filter = d.openMember; state.tab = "advice"; render(); window.scrollTo(0, 0); }
+  else if (d.trend) { const [c, t] = d.trend.split("|||"); state.trendCat = c; state.trendTest = t; render(); window.scrollTo(0, 0); }
+  else if (d.act && ACTIONS[d.act]) { e.preventDefault(); ACTIONS[d.act](b); }
+});
+document.addEventListener("change", e => {
+  const t = e.target, d = t.dataset;
+  if (t.id === "filter") { state.filter = t.value; render(); }
+  else if (d.complete) { const task = db.tasks.find(x => x.id === d.complete); if (task) { task.status = "Completed"; save(); setTimeout(render, 250); } }
+  else if (d.bind) { state[d.bind] = t.value; if (d.bind === "trendCat") state.trendTest = ""; render(); }
+  else if (t.id === "importFile") { const f = t.files[0]; t.value = ""; if (f) handleImportFile(f); }
+  else if (t.id === "pdfFile") { const f = t.files[0]; if (f) handlePdf(f); }
+  else if (d.pdf === "layout") {
+    state.pdfLayout = t.value;
+    if (pdfState && pdfState.text) { pdfState.layout = t.value; pdfState.rows = matchExistingNames(parseLabText(pdfState.text, t.value)); render(); }
+  }
+  else if (d.pdf && pdfState) pdfState[d.pdf] = t.value;
+});
+document.addEventListener("input", e => {
+  const t = e.target, d = t.dataset;
+  if (d.hist) { state.hist[d.hist] = t.value; renderHistoryTable(); try { sessionStorage.setItem("fh.ui2", JSON.stringify(state)); } catch (x) {} }
+  else if (d.cell && pdfState) {
+    const tr = t.closest("tr"), r = pdfState.rows[Number(tr.dataset.row)];
+    r[d.cell] = ["value","ref_low","ref_high"].includes(d.cell) ? num(t.value) : t.value;
+    tr.querySelector(".st").innerHTML = statusChip(computeStatus(r.value, r.ref_low, r.ref_high));
+  }
+});
+
+// Tooltips for chart points (hover, keyboard focus or tap)
+const tip = $("#tip");
+function showTip(el, x, y) {
+  tip.textContent = el.getAttribute("data-tip"); tip.style.display = "block";
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, x + 12)) + "px";
+  tip.style.top = (y - h - 12 < 8 ? y + 16 : y - h - 12) + "px";
+}
+document.addEventListener("mouseover", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (el) showTip(el, e.clientX, e.clientY); else tip.style.display = "none"; });
+document.addEventListener("click", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (el) showTip(el, e.clientX, e.clientY); });
+document.addEventListener("focusin", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (el) { const r = el.getBoundingClientRect(); showTip(el, r.left + r.width / 2, r.top); } });
+document.addEventListener("scroll", () => tip.style.display = "none", true);
+// Redraw charts when crossing the phone/desktop width (e.g. rotating a phone).
+let wasNarrow = window.innerWidth < 640;
+window.addEventListener("resize", () => { const n = window.innerWidth < 640; if (n !== wasNarrow) { wasNarrow = n; if (state.tab === "trends") render(); } });
+
+render();
+setSync("off");
+syncNow();
+// Pick up changes made on other devices when coming back to the app.
+const syncIfStale = () => { if (syncReady() && !syncing && Date.now() - lastTry > 20000) syncNow(); };
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") syncIfStale(); });
+window.addEventListener("online", syncIfStale);
+</script>
+<!--PDFJS-->
+</body>
+</html>
