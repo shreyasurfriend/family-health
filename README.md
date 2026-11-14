@@ -1,5 +1,7 @@
 # Family Health Records
 
+**Open the app:** https://shreyasurfriend.github.io/family-health/ (the page holds no data; records stay on each device and in your private sync repo).
+
 A private family health app in **one file: `index.html`**. Open it in any browser (Chrome, Edge, Firefox,
 Safari, phone or computer). No install, no Python, no server, no internet needed. Nothing is uploaded.
 
